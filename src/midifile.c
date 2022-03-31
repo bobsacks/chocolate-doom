@@ -87,7 +87,7 @@ struct midi_file_s
 // Check the header of a chunk:
 
 static boolean CheckChunkHeader(chunk_header_t *chunk,
-                                const char *expected_id)
+                                char *expected_id)
 {
     boolean result;
     
@@ -637,21 +637,6 @@ unsigned int MIDI_NumTracks(midi_file_t *file)
     return file->num_tracks;
 }
 
-// Get the number of events in a MIDI file.
-
-unsigned int MIDI_NumEvents(midi_file_t *file)
-{
-    int i;
-    unsigned int num_events = 0;
-
-    for (i = 0; i < file->num_tracks; ++i)
-    {
-        num_events += file->tracks[i].num_events;
-    }
-
-    return num_events;
-}
-
 // Start iterating over the events in a track.
 
 midi_track_iter_t *MIDI_IterateTrack(midi_file_t *file, unsigned int track)
@@ -772,7 +757,7 @@ void PrintTrack(midi_track_t *track)
 
         if (event->delta_time > 0)
         {
-            printf("Delay: %u ticks\n", event->delta_time);
+            printf("Delay: %i ticks\n", event->delta_time);
         }
 
         printf("Event type: %s (%i)\n",
@@ -788,19 +773,19 @@ void PrintTrack(midi_track_t *track)
             case MIDI_EVENT_PROGRAM_CHANGE:
             case MIDI_EVENT_CHAN_AFTERTOUCH:
             case MIDI_EVENT_PITCH_BEND:
-                printf("\tChannel: %u\n", event->data.channel.channel);
-                printf("\tParameter 1: %u\n", event->data.channel.param1);
-                printf("\tParameter 2: %u\n", event->data.channel.param2);
+                printf("\tChannel: %i\n", event->data.channel.channel);
+                printf("\tParameter 1: %i\n", event->data.channel.param1);
+                printf("\tParameter 2: %i\n", event->data.channel.param2);
                 break;
 
             case MIDI_EVENT_SYSEX:
             case MIDI_EVENT_SYSEX_SPLIT:
-                printf("\tLength: %u\n", event->data.sysex.length);
+                printf("\tLength: %i\n", event->data.sysex.length);
                 break;
 
             case MIDI_EVENT_META:
-                printf("\tMeta type: %u\n", event->data.meta.type);
-                printf("\tLength: %u\n", event->data.meta.length);
+                printf("\tMeta type: %i\n", event->data.meta.type);
+                printf("\tLength: %i\n", event->data.meta.length);
                 break;
         }
     }
@@ -827,7 +812,7 @@ int main(int argc, char *argv[])
 
     for (i=0; i<file->num_tracks; ++i)
     {
-        printf("\n== Track %u ==\n\n", i);
+        printf("\n== Track %i ==\n\n", i);
 
         PrintTrack(&file->tracks[i]);
     }

@@ -383,7 +383,9 @@ boolean P_CheckRobotRange(mobj_t *actor)
 fixed_t	xspeed[8] = {FRACUNIT,47000,0,-47000,-FRACUNIT,-47000,0,47000};
 fixed_t yspeed[8] = {0,47000,FRACUNIT,47000,0,-47000,-FRACUNIT,-47000};
 
-extern	line_t*	spechit[];
+#define MAXSPECIALCROSS	8
+
+extern	line_t*	spechit[MAXSPECIALCROSS];
 extern	int	numspechit;
 
 boolean P_Move (mobj_t*	actor)
@@ -2691,7 +2693,7 @@ void P_DestroyConverter(void)
 //
 void A_QuestMsg(mobj_t* actor)
 {
-    const char *name;
+    char* name;
     int quest;
     int i;
 

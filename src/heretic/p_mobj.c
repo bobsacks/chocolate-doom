@@ -1052,7 +1052,6 @@ void P_SpawnMapThing(mapthing_t * mthing)
     {
         // save spots for respawning in network games
         playerstarts[mthing->type - 1] = *mthing;
-        playerstartsingame[mthing->type - 1] = true;
         if (!deathmatch)
         {
             P_SpawnPlayer(mthing);
@@ -1075,7 +1074,7 @@ void P_SpawnMapThing(mapthing_t * mthing)
         return;
     }
 
-// check for appropriate skill level
+// check for apropriate skill level
     if (!netgame && (mthing->options & 16))
         return;
 

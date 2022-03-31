@@ -40,7 +40,7 @@
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
 static void CheckOpen(void);
-static void OpenScript(const char *name, int type);
+static void OpenScript(char *name, int type);
 
 // EXTERNAL DATA DECLARATIONS ----------------------------------------------
 
@@ -52,7 +52,7 @@ int sc_Line;
 boolean sc_End;
 boolean sc_Crossed;
 boolean sc_FileScripts = false;
-const char *sc_ScriptsDir = "";
+char *sc_ScriptsDir = "";
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
@@ -74,7 +74,7 @@ static boolean AlreadyGot = false;
 //
 //==========================================================================
 
-void SC_Open(const char *name)
+void SC_Open(char *name)
 {
     char fileName[128];
 
@@ -97,7 +97,7 @@ void SC_Open(const char *name)
 //
 //==========================================================================
 
-void SC_OpenLump(const char *name)
+void SC_OpenLump(char *name)
 {
     OpenScript(name, LUMP_SCRIPT);
 }
@@ -111,7 +111,7 @@ void SC_OpenLump(const char *name)
 //
 //==========================================================================
 
-void SC_OpenFile(const char *name)
+void SC_OpenFile(char *name)
 {
     OpenScript(name, FILE_ZONE_SCRIPT);
 }
@@ -122,7 +122,7 @@ void SC_OpenFile(const char *name)
 //
 //==========================================================================
 
-static void OpenScript(const char *name, int type)
+static void OpenScript(char *name, int type)
 {
     SC_Close();
     if (type == LUMP_SCRIPT)
@@ -195,8 +195,13 @@ boolean SC_GetString(void)
     }
     while (foundToken == false)
     {
-        while (ScriptPtr < ScriptEndPtr && *ScriptPtr <= 32)
+        while (*ScriptPtr <= 32)
         {
+            if (ScriptPtr >= ScriptEndPtr)
+            {
+                sc_End = true;
+                return false;
+            }
             if (*ScriptPtr++ == '\n')
             {
                 sc_Line++;
@@ -388,7 +393,7 @@ boolean SC_Check(void)
 //
 //==========================================================================
 
-int SC_MatchString(const char **strings)
+int SC_MatchString(char **strings)
 {
     int i;
 
@@ -408,7 +413,7 @@ int SC_MatchString(const char **strings)
 //
 //==========================================================================
 
-int SC_MustMatchString(const char **strings)
+int SC_MustMatchString(char **strings)
 {
     int i;
 
@@ -426,7 +431,7 @@ int SC_MustMatchString(const char **strings)
 //
 //==========================================================================
 
-boolean SC_Compare(const char *text)
+boolean SC_Compare(char *text)
 {
     if (strcasecmp(text, sc_String) == 0)
     {
@@ -441,7 +446,7 @@ boolean SC_Compare(const char *text)
 //
 //==========================================================================
 
-void SC_ScriptError(const char *message)
+void SC_ScriptError(char *message)
 {
     if (message == NULL)
     {

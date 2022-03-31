@@ -30,11 +30,8 @@ enum
     RADIO_VALUE_MUSHROOM,
     RADIO_VALUE_SNAKE,
 };
-
-// also put some crazy extensions to test the escape function. a"b"c"""dd
-const char *extensions[] = { "wad", "lmp", "txt", "a\"b\"c\"\"\"dd", "",
-     "\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"", NULL };
-const char *radio_values[] = { "Badger", "Mushroom", "Snake" };
+char *extensions[] = { "wad", "lmp", "txt", NULL };
+char *radio_values[] = { "Badger", "Mushroom", "Snake" };
 char *textbox_value = NULL;
 int numbox_value = 0;
 int radiobutton_value;
@@ -88,7 +85,7 @@ void CloseWindow(TXT_UNCAST_ARG(button), void *user_data)
 
 void UnicodeWindow(TXT_UNCAST_ARG(widget), void *user_data)
 {
-    static const char *strings[] = {
+    static char *strings[] = {
         "lunedì", "martedì", "mercoledì", "giovedì",
         "venerdì", "sabato", "domenica",
     };

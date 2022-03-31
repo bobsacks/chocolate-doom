@@ -83,7 +83,7 @@ static deh_context_t *DEH_NewContext(void)
 // Open a dehacked file for reading
 // Returns NULL if open failed
 
-deh_context_t *DEH_OpenFile(const char *filename)
+deh_context_t *DEH_OpenFile(char *filename)
 {
     FILE *fstream;
     deh_context_t *context;
@@ -175,16 +175,9 @@ int DEH_GetCharLump(deh_context_t *context)
 int DEH_GetChar(deh_context_t *context)
 {
     int result = 0;
-    boolean last_was_cr = false;
 
-    // Track the current line number
-
-    if (context->last_was_newline)
-    {
-        ++context->linenum;
-    }
-
-    // Read characters, converting CRLF to LF
+    // Read characters, but ignore carriage returns
+    // Essentially this is a DOS->Unix conversion
 
     do
     {
@@ -198,27 +191,14 @@ int DEH_GetChar(deh_context_t *context)
                 result = DEH_GetCharLump(context);
                 break;
         }
+    } while (result == '\r');
 
-        // Handle \r characters not paired with \n
-        if (last_was_cr && result != '\n')
-        {
-            switch (context->type)
-            {
-                case DEH_INPUT_FILE:
-                    ungetc(result, context->stream);
-                    break;
+    // Track the current line number
 
-                case DEH_INPUT_LUMP:
-                    --context->input_buffer_pos;
-                    break;
-            }
-
-            return '\r';
-        }
-
-        last_was_cr = result == '\r';
-
-    } while (last_was_cr);
+    if (context->last_was_newline)
+    {
+        ++context->linenum;
+    }
 
     context->last_was_newline = result == '\n';
 
@@ -322,7 +302,7 @@ char *DEH_ReadLine(deh_context_t *context, boolean extended)
     return context->readbuffer;
 }
 
-void DEH_Warning(deh_context_t *context, const char *msg, ...)
+void DEH_Warning(deh_context_t *context, char *msg, ...)
 {
     va_list args;
 
@@ -335,7 +315,7 @@ void DEH_Warning(deh_context_t *context, const char *msg, ...)
     va_end(args);
 }
 
-void DEH_Error(deh_context_t *context, const char *msg, ...)
+void DEH_Error(deh_context_t *context, char *msg, ...)
 {
     va_list args;
 

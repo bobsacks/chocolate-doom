@@ -18,17 +18,13 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "SDL.h"
 
 #include "doomtype.h"
 #include "i_system.h"
 #include "m_argv.h"
-#include "m_misc.h"
-
 
 //
 // D_DoomMain()
@@ -43,34 +39,9 @@ int main(int argc, char **argv)
     // save arguments
 
     myargc = argc;
-    myargv = malloc(argc * sizeof(char *));
-    assert(myargv != NULL);
-
-    for (int i = 0; i < argc; i++)
-    {
-        myargv[i] = M_StringDuplicate(argv[i]);
-    }
-
-    //!
-    // Print the program version and exit.
-    //
-    if (M_ParmExists("-version") || M_ParmExists("--version")) {
-        puts(PACKAGE_STRING);
-        exit(0);
-    }
-
-#if defined(_WIN32)
-    // compose a proper command line from loose file paths passed as arguments
-    // to allow for loading WADs and DEHACKED patches by drag-and-drop
-    M_AddLooseFiles();
-#endif
+    myargv = argv;
 
     M_FindResponseFile();
-    M_SetExeDir();
-
-    #ifdef SDL_HINT_NO_SIGNAL_HANDLERS
-    SDL_SetHint(SDL_HINT_NO_SIGNAL_HANDLERS, "1");
-    #endif
 
     // start doom
 

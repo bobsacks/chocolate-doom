@@ -16,6 +16,7 @@ DLL_FILES=$(TOPLEVEL)/src/SDL.dll                      \
 all: $(ZIPS)
 
 $(ZIPS):
+	unix2dos $</*.txt
 	zip -j -r $@ $</*
 
 $(DOOM_ZIP): staging-doom hook-doom
@@ -26,31 +27,37 @@ $(STRIFE_ZIP): staging-strife hook-strife
 # Special hooks to custom modify files for particular games.
 
 hook-doom: staging-doom
-	-pandoc -f gfm -s -o $</NOT-BUGS.html $(TOPLEVEL)/NOT-BUGS.md
+	cp $(TOPLEVEL)/NOT-BUGS.md $</NOT-BUGS.txt
 
 # Chocolate Strife has its own custom README file:
 
 hook-strife: staging-strife
-	-pandoc -f gfm -s -o $</README.html $(TOPLEVEL)/README.Strife.md
+	cp $(TOPLEVEL)/README.Strife.md $</README.txt
 
 # Build up a staging dir for a particular game.
 
 staging-%:
 	mkdir $@
-	LC_ALL=C ./cp-with-libs --ldflags="$(LDFLAGS)" \
+	./cp-with-libs --ldflags="$(LDFLAGS)" \
 	               $(TOPLEVEL)/src/$(PROGRAM_PREFIX)$*.exe $@
-	LC_ALL=C ./cp-with-libs --ldflags="$(LDFLAGS)" \
+	./cp-with-libs --ldflags="$(LDFLAGS)" \
 	               $(TOPLEVEL)/src/$(PROGRAM_PREFIX)setup.exe \
 	               $@/$(PROGRAM_PREFIX)$*-setup.exe
+	./cp-with-libs --ldflags="$(LDFLAGS)" \
+	               $(TOPLEVEL)/midiproc/$(PROGRAM_PREFIX)midiproc.exe \
+	               $@/$(PROGRAM_PREFIX)midiproc.exe
 
 	$(STRIP) $@/*.exe $@/*.dll
 
-	-for f in $(DOC_FILES); do                              \
-		pandoc  -f gfm -o $@/$$(basename $$f .md).html  \
-			-s $(TOPLEVEL)/$$f;                     \
+	for f in $(DOC_FILES); do                                \
+		cp $(TOPLEVEL)/$$f $@/$$(basename $$f .md).txt;  \
 	done
-	-pandoc -f gfm -s -o $@/CMDLINE.html $(TOPLEVEL)/man/CMDLINE.$*.md
-	-pandoc -f gfm -s -o $@/INSTALL.html $(TOPLEVEL)/man/INSTALL.$*
+	cp $(TOPLEVEL)/man/CMDLINE.$* $@/CMDLINE.txt
+
+	$(TOPLEVEL)/man/simplecpp -D_WIN32 -DPRECOMPILED  \
+	             -D$(shell echo $* | tr a-z A-Z)      \
+	         < $(TOPLEVEL)/man/INSTALL.template       \
+	         > $@/INSTALL.txt
 
 clean:
 	rm -f $(ZIPS)

@@ -65,7 +65,7 @@ int numsprites;
 
 spriteframe_t sprtemp[30];
 int maxframe;
-static const char *spritename;
+char *spritename;
 
 
 
@@ -144,9 +144,9 @@ void R_InstallSpriteLump(int lump, unsigned frame, unsigned rotation,
 =================
 */
 
-void R_InitSpriteDefs(const char **namelist)
+void R_InitSpriteDefs(char **namelist)
 {
-    const char **check;
+    char **check;
     int i, l, frame, rotation;
     int start, end;
 
@@ -258,7 +258,7 @@ int newvissprite;
 ===================
 */
 
-void R_InitSprites(const char **namelist)
+void R_InitSprites(char **namelist)
 {
     int i;
 
@@ -727,7 +727,6 @@ void R_DrawPSprite(pspdef_t * psp)
     vis->mobjflags = 0;
     vis->class = 0;
     vis->psprite = true;
-    vis->floorclip = 0;
     vis->texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2
         - (psp->sy - spritetopoffset[lump]);
     if (viewheight == SCREENHEIGHT)
@@ -1034,7 +1033,7 @@ void R_DrawMasked(void)
 //
 // Added for the sideviewing with an external device
     if (viewangleoffset <= 1024 << ANGLETOFINESHIFT || viewangleoffset >=
-        -(1024 << ANGLETOFINESHIFT))
+        -1024 << ANGLETOFINESHIFT)
     {                           // don't draw on side views
         R_DrawPlayerSprites();
     }

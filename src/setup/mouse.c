@@ -46,12 +46,7 @@ static int *all_mouse_buttons[] = {
     &mousebuse,
     &mousebjump,
     &mousebprevweapon,
-    &mousebnextweapon,
-    &mousebspeed,
-    &mousebinvleft,
-    &mousebinvright,
-    &mousebturnleft,
-    &mousebturnright,
+    &mousebnextweapon
 };
 
 static void MouseSetCallback(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(variable))
@@ -72,7 +67,7 @@ static void MouseSetCallback(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(variable))
     }
 }
 
-static void AddMouseControl(TXT_UNCAST_ARG(table), const char *label, int *var)
+static void AddMouseControl(TXT_UNCAST_ARG(table), char *label, int *var)
 {
     TXT_CAST_ARG(txt_table_t, table);
     txt_mouse_input_t *mouse_input;
@@ -95,33 +90,26 @@ static void ConfigExtraButtons(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
     TXT_SetWindowHelpURL(window, WINDOW_HELP_URL);
 
     TXT_AddWidgets(window,
-                   buttons_table = TXT_NewTable(4),
+                   buttons_table = TXT_NewTable(2),
                    NULL);
 
-    TXT_SetColumnWidths(buttons_table, 16, 11, 14, 10);
+    TXT_SetColumnWidths(buttons_table, 24, 5);
 
-    AddMouseControl(buttons_table, "Move forward", &mousebforward);
-    AddMouseControl(buttons_table, "Strafe left", &mousebstrafeleft);
     AddMouseControl(buttons_table, "Move backward", &mousebbackward);
+    AddMouseControl(buttons_table, "Use", &mousebuse);
+    AddMouseControl(buttons_table, "Strafe left", &mousebstrafeleft);
     AddMouseControl(buttons_table, "Strafe right", &mousebstraferight);
-    AddMouseControl(buttons_table, "Previous weapon", &mousebprevweapon);
-    AddMouseControl(buttons_table, "Strafe on", &mousebstrafe);
-    AddMouseControl(buttons_table, "Next weapon", &mousebnextweapon);
-    AddMouseControl(buttons_table, "Run", &mousebspeed);
-    
-    if (gamemission == heretic)
-    {
-      AddMouseControl(buttons_table, "Inventory left", &mousebinvleft);
-      AddMouseControl(buttons_table, "Inventory right", &mousebinvright);
-    }
 
     if (gamemission == hexen || gamemission == strife)
     {
         AddMouseControl(buttons_table, "Jump", &mousebjump);
     }
+
+    AddMouseControl(buttons_table, "Previous weapon", &mousebprevweapon);
+    AddMouseControl(buttons_table, "Next weapon", &mousebnextweapon);
 }
 
-void ConfigMouse(TXT_UNCAST_ARG(widget), void *user_data)
+void ConfigMouse(void)
 {
     txt_window_t *window;
 
@@ -157,7 +145,8 @@ void ConfigMouse(TXT_UNCAST_ARG(widget), void *user_data)
                    NULL);
 
     AddMouseControl(window, "Fire/Attack", &mousebfire);
-    AddMouseControl(window, "Use", &mousebuse);
+    AddMouseControl(window, "Move forward", &mousebforward);
+    AddMouseControl(window, "Strafe on", &mousebstrafe);
 
     TXT_AddWidget(window,
                   TXT_NewButton2("More controls...", ConfigExtraButtons, NULL));

@@ -33,13 +33,13 @@
 
 typedef struct
 {
-    const char *name;  // Config file name
+    char *name;  // Config file name
     int value;
 } joystick_config_t;
 
 typedef struct
 {
-    const char *name;
+    char *name;
     int axes, buttons, hats;
     const joystick_config_t *configs;
 } known_joystick_t;
@@ -972,7 +972,7 @@ static void CalibrateJoystick(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
 // GUI
 //
 
-static void AddJoystickControl(TXT_UNCAST_ARG(table), const char *label, int *var)
+static void AddJoystickControl(TXT_UNCAST_ARG(table), char *label, int *var)
 {
     TXT_CAST_ARG(txt_table_t, table);
     txt_joystick_input_t *joy_input;
@@ -986,7 +986,7 @@ static void AddJoystickControl(TXT_UNCAST_ARG(table), const char *label, int *va
                    NULL);
 }
 
-void ConfigJoystick(TXT_UNCAST_ARG(widget), void *user_data)
+void ConfigJoystick(void)
 {
     txt_window_t *window;
 
@@ -1063,7 +1063,7 @@ void ConfigJoystick(TXT_UNCAST_ARG(widget), void *user_data)
 
     if (joybspeed < 20)
     {
-        AddJoystickControl(window, "Run", &joybspeed);
+        AddJoystickControl(window, "Speed", &joybspeed);
     }
 
     if (gamemission == hexen || gamemission == strife)

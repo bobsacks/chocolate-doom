@@ -58,7 +58,19 @@
 #define HU_INPUTWIDTH   64
 #define HU_INPUTHEIGHT  1
 
-char *chat_macros[10];
+char *chat_macros[10] =
+{
+    HUSTR_CHATMACRO0,
+    HUSTR_CHATMACRO1,
+    HUSTR_CHATMACRO2,
+    HUSTR_CHATMACRO3,
+    HUSTR_CHATMACRO4,
+    HUSTR_CHATMACRO5,
+    HUSTR_CHATMACRO6,
+    HUSTR_CHATMACRO7,
+    HUSTR_CHATMACRO8,
+    HUSTR_CHATMACRO9
+};
 
 // villsa [STRIFE]
 char player_names[8][16] =
@@ -109,7 +121,7 @@ static boolean hu_setting_name = false;
 // haleyjd 08/31/10: [STRIFE] Changed for Strife level names.
 // List of names for levels.
 
-const char *mapnames[] =
+char *mapnames[] =
 {
     // Strife map names
 
@@ -202,7 +214,7 @@ void HU_Stop(void)
 void HU_Start(void)
 {
     int         i;
-    const char *s;
+    char*       s;
 
     // haleyjd 20120211: [STRIFE] not called here.
     //if (headsupactive)
@@ -301,12 +313,12 @@ void HU_Erase(void)
 //
 //  Fastcall Registers:   edx          ebx
 //      Temp Registers:   esi          edi
-static void HU_addMessage(const char *prefix, const char *message)
+void HU_addMessage(char *prefix, char *message)
 {
     char  c;         // eax
     int   width = 0; // edx
-    const char *rover1;    // ebx (in first loop)
-    const char *rover2;    // ecx (in second loop)
+    char *rover1;    // ebx (in first loop)
+    char *rover2;    // ecx (in second loop)
     char *bufptr;    // ebx (in second loop)
     char buffer[HU_MAXLINELENGTH+2];  // esp+52h
 

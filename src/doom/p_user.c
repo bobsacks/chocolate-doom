@@ -295,7 +295,14 @@ void P_PlayerThink (player_t* player)
 	{
 	    newweapon = wp_supershotgun;
 	}
-	
+    //toggle flames and plasma
+	if ( (gamemode == commercial)
+	    && newweapon == wp_flames 
+	    && player->weaponowned[wp_plasma]
+	    && player->readyweapon != wp_plasma)
+	{
+	    newweapon = wp_plasma;
+	}
 
 	if (player->weaponowned[newweapon]
 	    && newweapon != player->readyweapon)

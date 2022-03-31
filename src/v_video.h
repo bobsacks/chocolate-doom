@@ -75,7 +75,7 @@ void V_DrawBox(int x, int y, int w, int h, int c);
 
 // Draw a raw screen lump
 
-void V_DrawRawScreen(pixel_t *raw);
+void V_DrawRawScreen(byte *raw);
 
 // Temporarily switch to using a different buffer to draw graphics, etc.
 
@@ -89,7 +89,7 @@ void V_RestoreBuffer(void);
 // format described in the string passed to the function, eg.
 // "DOOM%02i.pcx"
 
-void V_ScreenShot(const char *format);
+void V_ScreenShot(char *format);
 
 // Load the lookup table for translucency calculations from the TINTTAB
 // lump.

@@ -34,7 +34,7 @@
 
 typedef struct
 {
-    const char *name;
+    char *name;
     const uint8_t *data;
     unsigned int w;
     unsigned int h;
@@ -85,7 +85,7 @@ static const struct {
 // Unicode key mapping; see codepage.h.
 static const short code_page_to_unicode[] = CODE_PAGE_TO_UNICODE;
 
-static const SDL_Color ega_colors[] =
+static SDL_Color ega_colors[] =
 {
     {0x00, 0x00, 0x00, 0xff},          // 0: Black
     {0x00, 0x00, 0xa8, 0xff},          // 1: Blue
@@ -133,7 +133,7 @@ static int Win32_UseLargeFont(void)
 
 #endif
 
-static const txt_font_t *FontForName(const char *name)
+static const txt_font_t *FontForName(char *name)
 {
     int i;
     const txt_font_t *fonts[] =
@@ -253,13 +253,7 @@ int TXT_Init(void)
     if (TXT_SDLWindow == NULL)
         return 0;
 
-    renderer = SDL_CreateRenderer(TXT_SDLWindow, -1, SDL_RENDERER_PRESENTVSYNC);
-
-    if (renderer == NULL)
-        renderer = SDL_CreateRenderer(TXT_SDLWindow, -1, SDL_RENDERER_SOFTWARE);
-
-    if (renderer == NULL)
-        return 0;
+    renderer = SDL_CreateRenderer(TXT_SDLWindow, -1, 0);
 
     // Special handling for OS X retina display. If we successfully set the
     // highdpi flag, check the output size for the screen renderer. If we get
@@ -312,15 +306,6 @@ void TXT_Shutdown(void)
     SDL_FreeSurface(screenbuffer);
     screenbuffer = NULL;
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
-}
-
-void TXT_SetColor(txt_color_t color, int r, int g, int b)
-{
-    SDL_Color c = {r, g, b, 0xff};
-
-    SDL_LockSurface(screenbuffer);
-    SDL_SetPaletteColors(screenbuffer->format->palette, &c, color, 1);
-    SDL_UnlockSurface(screenbuffer);
 }
 
 unsigned char *TXT_GetScreenData(void)
@@ -533,7 +518,7 @@ static int TranslateScancode(SDL_Scancode scancode)
     }
 }
 
-static int TranslateKeysym(const SDL_Keysym *sym)
+static int TranslateKeysym(SDL_Keysym *sym)
 {
     int translated;
 
@@ -573,7 +558,7 @@ static int SDLButtonToTXTButton(int button)
 
 // Convert an SDL wheel motion to a textscreen button index.
 
-static int SDLWheelToTXTButton(const SDL_MouseWheelEvent *wheel)
+static int SDLWheelToTXTButton(SDL_MouseWheelEvent *wheel)
 {
     if (wheel->y <= 0)
     {
@@ -905,7 +890,7 @@ void TXT_SetInputMode(txt_input_mode_t mode)
     input_mode = mode;
 }
 
-void TXT_SetWindowTitle(const char *title)
+void TXT_SetWindowTitle(char *title)
 {
     SDL_SetWindowTitle(TXT_SDLWindow, title);
 }

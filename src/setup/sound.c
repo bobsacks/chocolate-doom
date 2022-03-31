@@ -22,7 +22,6 @@
 #include "m_config.h"
 #include "m_misc.h"
 
-#include "execute.h"
 #include "mode.h"
 #include "sound.h"
 
@@ -35,14 +34,13 @@ typedef enum
     NUM_OPLMODES,
 } oplmode_t;
 
-static const char *opltype_strings[] =
+static char *opltype_strings[] =
 {
     "OPL2",
     "OPL3"
 };
 
-static const char *cfg_extension[] = { "cfg", NULL };
-static const char *sf_extension[] = { "sf2", "sf3", NULL };
+static char *cfg_extension[] = { "cfg", NULL };
 
 // Config file variables:
 
@@ -66,7 +64,6 @@ static float libsamplerate_scale = 0.65;
 
 static char *music_pack_path = NULL;
 static char *timidity_cfg_path = NULL;
-static char *fluidsynth_sf_path = NULL;
 static char *gus_patch_path = NULL;
 static int gus_ram_kb = 1024;
 
@@ -116,18 +113,9 @@ static txt_dropdown_list_t *OPLTypeSelector(void)
     return result;
 }
 
-static void OpenMusicPackDir(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(unused))
-{
-    if (!OpenFolder(music_pack_path))
-    {
-        TXT_MessageBox("Error", "Failed to open music pack directory.");
-    }
-}
-
-void ConfigSound(TXT_UNCAST_ARG(widget), void *user_data)
+void ConfigSound(void)
 {
     txt_window_t *window;
-    txt_window_action_t *music_action;
 
     // Build the window
 
@@ -137,10 +125,6 @@ void ConfigSound(TXT_UNCAST_ARG(widget), void *user_data)
     TXT_SetColumnWidths(window, 40);
     TXT_SetWindowPosition(window, TXT_HORIZ_CENTER, TXT_VERT_TOP,
                                   TXT_SCREEN_W / 2, 3);
-
-    music_action = TXT_NewWindowAction('m', "Music Packs");
-    TXT_SetWindowAction(window, TXT_HORIZ_CENTER, music_action);
-    TXT_SignalConnect(music_action, "pressed", OpenMusicPackDir, NULL);
 
     TXT_AddWidgets(window,
         TXT_NewSeparator("Sound effects"),
@@ -198,11 +182,12 @@ void ConfigSound(TXT_UNCAST_ARG(widget), void *user_data)
                                     "Select Timidity config file",
                                     cfg_extension),
                 TXT_NewStrut(4, 0),
-                TXT_NewLabel("FluidSynth soundfont file: "),
+                TXT_NewLabel("Digital music pack directory: "),
                 TXT_NewStrut(4, 0),
-                TXT_NewFileSelector(&fluidsynth_sf_path, 34,
-                                    "Select FluidSynth soundfont file",
-                                    sf_extension),
+                TXT_NewFileSelector(&music_pack_path, 34,
+                                    "Select directory containing music pack "
+                                    "config files",
+                                    TXT_DIRECTORY),
                 NULL)),
         NULL);
 }
@@ -223,7 +208,6 @@ void BindSoundVariables(void)
     M_BindStringVariable("gus_patch_path",        &gus_patch_path);
     M_BindStringVariable("music_pack_path",     &music_pack_path);
     M_BindStringVariable("timidity_cfg_path",     &timidity_cfg_path);
-    M_BindStringVariable("fluidsynth_sf_path",    &fluidsynth_sf_path);
 
     M_BindIntVariable("snd_sbport",               &snd_sbport);
     M_BindIntVariable("snd_sbirq",                &snd_sbirq);
@@ -247,7 +231,6 @@ void BindSoundVariables(void)
     music_pack_path = M_StringDuplicate("");
     timidity_cfg_path = M_StringDuplicate("");
     gus_patch_path = M_StringDuplicate("");
-    fluidsynth_sf_path = M_StringDuplicate("");
 
     // All versions of Heretic and Hexen did pitch-shifting.
     // Most versions of Doom did not and Strife never did.

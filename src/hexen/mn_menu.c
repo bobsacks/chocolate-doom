@@ -68,7 +68,7 @@ typedef enum
 typedef struct
 {
     ItemType_t type;
-    const char *text;
+    char *text;
     void (*func) (int option);
     int option;
     MenuType_t menu;
@@ -131,6 +131,7 @@ boolean MenuActive;
 int InfoType;
 int messageson = true;
 boolean mn_SuicideConsole;
+boolean demoextend; // from h2def.h
 
 // PRIVATE DATA DEFINITIONS ------------------------------------------------
 
@@ -293,7 +294,7 @@ static Menu_t *Menus[] = {
     &SaveMenu
 };
 
-static const char *GammaText[] = {
+static char *GammaText[] = {
     TXT_GAMMA_LEVEL_OFF,
     TXT_GAMMA_LEVEL_1,
     TXT_GAMMA_LEVEL_2,
@@ -338,7 +339,7 @@ static void InitFonts(void)
 //
 //---------------------------------------------------------------------------
 
-void MN_DrTextA(const char *text, int x, int y)
+void MN_DrTextA(char *text, int x, int y)
 {
     char c;
     patch_t *p;
@@ -364,7 +365,7 @@ void MN_DrTextA(const char *text, int x, int y)
 //
 //==========================================================================
 
-void MN_DrTextAYellow(const char *text, int x, int y)
+void MN_DrTextAYellow(char *text, int x, int y)
 {
     char c;
     patch_t *p;
@@ -392,7 +393,7 @@ void MN_DrTextAYellow(const char *text, int x, int y)
 //
 //---------------------------------------------------------------------------
 
-int MN_TextAWidth(const char *text)
+int MN_TextAWidth(char *text)
 {
     char c;
     int width;
@@ -422,7 +423,7 @@ int MN_TextAWidth(const char *text)
 //
 //---------------------------------------------------------------------------
 
-void MN_DrTextB(const char *text, int x, int y)
+void MN_DrTextB(char *text, int x, int y)
 {
     char c;
     patch_t *p;
@@ -450,7 +451,7 @@ void MN_DrTextB(const char *text, int x, int y)
 //
 //---------------------------------------------------------------------------
 
-int MN_TextBWidth(const char *text)
+int MN_TextBWidth(char *text)
 {
     char c;
     int width;
@@ -493,7 +494,7 @@ void MN_Ticker(void)
 //
 //---------------------------------------------------------------------------
 
-const char *QuitEndMsg[] = {
+char *QuitEndMsg[] = {
     "ARE YOU SURE YOU WANT TO QUIT?",
     "ARE YOU SURE YOU WANT TO END THE GAME?",
     "DO YOU WANT TO QUICKSAVE THE GAME NAMED",
@@ -507,7 +508,7 @@ void MN_Drawer(void)
     int x;
     int y;
     MenuItem_t *item;
-    const char *selName;
+    char *selName;
 
     if (MenuActive == false)
     {
@@ -595,12 +596,12 @@ static void DrawMainMenu(void)
 static void DrawClassMenu(void)
 {
     pclass_t class;
-    static const char *boxLumpName[3] = {
+    static char *boxLumpName[3] = {
         "m_fbox",
         "m_cbox",
         "m_mbox"
     };
-    static const char *walkLumpName[3] = {
+    static char *walkLumpName[3] = {
         "m_fwalk1",
         "m_cwalk1",
         "m_mwalk1"
@@ -1658,10 +1659,9 @@ boolean MN_Responder(event_t * event)
         {
             if (slotptr)
             {
-                *textBuffer = 0;
-                slotptr--;
-                textBuffer = &SlotText[currentSlot][slotptr];
+                *textBuffer-- = 0;
                 *textBuffer = ASCII_CURSOR;
+                slotptr--;
             }
             return (true);
         }

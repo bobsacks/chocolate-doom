@@ -595,9 +595,27 @@ A_FirePlasma
 		  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
 
     P_SpawnPlayerMissile (player->mo, MT_PLASMA);
+    //P_SpawnPlayerMissile (player->mo, MT_FLAMES);
 }
 
 
+//
+// A_FireFlames
+//
+void
+A_FireFlames
+( player_t*	player,
+  pspdef_t*	psp ) 
+{
+    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+
+    P_SetPsprite (player,
+		  ps_flash,
+		  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
+
+    //P_SpawnPlayerMissile (player->mo, MT_PLASMA);
+    P_SpawnPlayerMissile (player->mo, MT_FLAMES);
+}
 
 //
 // P_BulletSlope
@@ -861,12 +879,13 @@ void P_MovePsprites (player_t* player)
 {
     int		i;
     pspdef_t*	psp;
+    state_t*	state;
 	
     psp = &player->psprites[0];
     for (i=0 ; i<NUMPSPRITES ; i++, psp++)
     {
 	// a null state means not active
-	if (psp->state)
+	if ( (state = psp->state) )	
 	{
 	    // drop tic count and possibly change state
 

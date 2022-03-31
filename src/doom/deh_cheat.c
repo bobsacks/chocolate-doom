@@ -28,7 +28,7 @@
 
 typedef struct 
 {
-    const char *name;
+    char *name;
     cheatseq_t *seq;
 } deh_cheat_t;
 

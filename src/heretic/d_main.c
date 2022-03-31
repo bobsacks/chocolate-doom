@@ -54,7 +54,7 @@
 #define STARTUP_WINDOW_Y 7
 
 GameMode_t gamemode = indetermined;
-const char *gamedescription = "unknown";
+char *gamedescription = "unknown";
 
 boolean nomonsters;             // checkparm of -nomonsters
 boolean respawnparm;            // checkparm of -respawn
@@ -269,9 +269,9 @@ void D_DoomLoop(void)
 ===============================================================================
 */
 
-static int demosequence;
-static int pagetic;
-static const char *pagename;
+int demosequence;
+int pagetic;
+char *pagename;
 
 
 /*
@@ -448,6 +448,7 @@ void D_CheckRecordFrom(void)
 
 char *iwadfile;
 
+char *basedefault = "heretic.cfg";
 
 void wadprintf(void)
 {
@@ -487,7 +488,7 @@ char smsg[80];                  // status bar line
 
 static int startup_line = STARTUP_WINDOW_Y;
 
-void hprintf(const char *string)
+void hprintf(char *string)
 {
     if (using_graphical_startup)
     {
@@ -520,7 +521,7 @@ void drawstatus(void)
     }
 }
 
-static void status(const char *string)
+void status(char *string)
 {
     if (using_graphical_startup)
     {
@@ -610,7 +611,7 @@ static void finishStartup(void)
 }
 
 char tmsg[300];
-void tprintf(const char *msg, int initflag)
+void tprintf(char *msg, int initflag)
 {
     printf("%s", msg);
 }
@@ -736,7 +737,6 @@ void D_DoomMain(void)
     I_AtExit(D_Endoom, false);
 
     //!
-    // @category game
     // @vanilla
     //
     // Disable monsters.
@@ -745,7 +745,6 @@ void D_DoomMain(void)
     nomonsters = M_ParmExists("-nomonsters");
 
     //!
-    // @category game
     // @vanilla
     //
     // Monsters respawn after being killed.
@@ -762,7 +761,6 @@ void D_DoomMain(void)
     ravpic = M_ParmExists("-ravpic");
 
     //!
-    // @category obscure
     // @vanilla
     //
     // Allow artifacts to be used when the run key is held down.
@@ -793,7 +791,6 @@ void D_DoomMain(void)
     }
 
     //!
-    // @category game
     // @arg <skill>
     // @vanilla
     //
@@ -809,7 +806,6 @@ void D_DoomMain(void)
     }
 
     //!
-    // @category game
     // @arg <n>
     // @vanilla
     //
@@ -825,7 +821,6 @@ void D_DoomMain(void)
     }
 
     //!
-    // @category game
     // @arg <x> <y>
     // @vanilla
     //
@@ -853,7 +848,6 @@ void D_DoomMain(void)
 #ifdef _WIN32
 
     //!
-    // @category obscure
     // @platform windows
     // @vanilla
     //
@@ -899,23 +893,6 @@ void D_DoomMain(void)
 
     D_AddFile(iwadfile);
     W_CheckCorrectIWAD(heretic);
-
-    //!
-    // @category mod
-    //
-    // Disable auto-loading of .wad files.
-    //
-    if (!M_ParmExists("-noautoload"))
-    {
-        char *autoload_dir;
-        autoload_dir = M_GetAutoloadDir("heretic.wad");
-        if (autoload_dir != NULL)
-        {
-            DEH_AutoLoadPatches(autoload_dir);
-            W_AutoLoadWADs(autoload_dir);
-            free(autoload_dir);
-        }
-    }
 
     // Load dehacked patches specified on the command line.
     DEH_ParseCommandLine();
@@ -978,9 +955,6 @@ void D_DoomMain(void)
 
         printf("Playing demo %s.\n", file);
     }
-
-    // Generate the WAD hash table.  Speed things up a bit.
-    W_GenerateHashTable();
 
     //!
     // @category demo
@@ -1092,7 +1066,7 @@ void D_DoomMain(void)
     IncThermo();
 
 //
-// start the appropriate game based on params
+// start the apropriate game based on parms
 //
 
     D_CheckRecordFrom();
@@ -1128,7 +1102,6 @@ void D_DoomMain(void)
     }
 
     //!
-    // @category game
     // @arg <s>
     // @vanilla
     //

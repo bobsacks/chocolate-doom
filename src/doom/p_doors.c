@@ -209,6 +209,8 @@ EV_DoLockedDoor
     {
       case 99:	// Blue Lock
       case 133:
+	if ( !p )
+	    return 0;
 	if (!p->cards[it_bluecard] && !p->cards[it_blueskull])
 	{
 	    p->message = DEH_String(PD_BLUEO);
@@ -219,6 +221,8 @@ EV_DoLockedDoor
 	
       case 134: // Red Lock
       case 135:
+	if ( !p )
+	    return 0;
 	if (!p->cards[it_redcard] && !p->cards[it_redskull])
 	{
 	    p->message = DEH_String(PD_REDO);
@@ -229,6 +233,8 @@ EV_DoLockedDoor
 	
       case 136:	// Yellow Lock
       case 137:
+	if ( !p )
+	    return 0;
 	if (!p->cards[it_yellowcard] &&
 	    !p->cards[it_yellowskull])
 	{

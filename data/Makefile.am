@@ -9,7 +9,7 @@ EXTRA_DIST=              \
         setup.png        \
         convert-icon
 
-iconsdir = $(prefix)/share/icons/hicolor/128x128/apps
+iconsdir = $(prefix)/share/icons
 icons_DATA = @PROGRAM_PREFIX@doom.png   \
              @PROGRAM_PREFIX@setup.png
 

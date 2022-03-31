@@ -20,7 +20,6 @@
 //
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -534,7 +533,7 @@ void V_DrawBlock(int x, int y, int width, int height, pixel_t *src)
 
 void V_DrawFilledBox(int x, int y, int w, int h, int c)
 {
-    pixel_t *buf, *buf1;
+    uint8_t *buf, *buf1;
     int x1, y1;
 
     buf = I_VideoBuffer + SCREENWIDTH * y + x;
@@ -554,7 +553,7 @@ void V_DrawFilledBox(int x, int y, int w, int h, int c)
 
 void V_DrawHorizLine(int x, int y, int w, int c)
 {
-    pixel_t *buf;
+    uint8_t *buf;
     int x1;
 
     buf = I_VideoBuffer + SCREENWIDTH * y + x;
@@ -567,7 +566,7 @@ void V_DrawHorizLine(int x, int y, int w, int c)
 
 void V_DrawVertLine(int x, int y, int h, int c)
 {
-    pixel_t *buf;
+    uint8_t *buf;
     int y1;
 
     buf = I_VideoBuffer + SCREENWIDTH * y + x;
@@ -592,9 +591,9 @@ void V_DrawBox(int x, int y, int w, int h, int c)
 // to the screen)
 //
  
-void V_DrawRawScreen(pixel_t *raw)
+void V_DrawRawScreen(byte *raw)
 {
-    memcpy(dest_screen, raw, SCREENWIDTH * SCREENHEIGHT * sizeof(*dest_screen));
+    memcpy(dest_screen, raw, SCREENWIDTH * SCREENHEIGHT);
 }
 
 //
@@ -656,7 +655,7 @@ typedef PACKED_STRUCT (
 // WritePCXfile
 //
 
-void WritePCXfile(char *filename, pixel_t *data,
+void WritePCXfile(char *filename, byte *data,
                   int width, int height,
                   byte *palette)
 {
@@ -725,7 +724,7 @@ static void warning_fn(png_structp p, png_const_charp s)
     printf("libpng warning: %s\n", s);
 }
 
-void WritePNGfile(char *filename, pixel_t *data,
+void WritePNGfile(char *filename, byte *data,
                   int width, int height,
                   byte *palette)
 {
@@ -737,7 +736,7 @@ void WritePNGfile(char *filename, pixel_t *data,
     int w_factor, h_factor;
     byte *rowbuf;
 
-    if (aspect_ratio_correct == 1)
+    if (aspect_ratio_correct)
     {
         // scale up to accommodate aspect ratio correction
         w_factor = 5;
@@ -832,11 +831,11 @@ void WritePNGfile(char *filename, pixel_t *data,
 // V_ScreenShot
 //
 
-void V_ScreenShot(const char *format)
+void V_ScreenShot(char *format)
 {
     int i;
     char lbmname[16]; // haleyjd 20110213: BUG FIX - 12 is too small!
-    const char *ext;
+    char *ext;
     
     // find a file name to save it to
 
@@ -895,30 +894,71 @@ void V_ScreenShot(const char *format)
 
 #define MOUSE_SPEED_BOX_WIDTH  120
 #define MOUSE_SPEED_BOX_HEIGHT 9
-#define MOUSE_SPEED_BOX_X (SCREENWIDTH - MOUSE_SPEED_BOX_WIDTH - 10)
-#define MOUSE_SPEED_BOX_Y 15
 
 //
 // V_DrawMouseSpeedBox
 //
 
-static void DrawAcceleratingBox(int speed)
+// If box is only to calibrate speed, testing relative speed (as a measure
+// of game pixels to movement units) is important whether physical mouse DPI
+// is high or low. Line resolution starts at 1 pixel per 1 move-unit: if
+// line maxes out, resolution becomes 1 pixel per 2 move-units, then per
+// 3 move-units, etc.
+
+static int linelen_multiplier = 1;
+
+void V_DrawMouseSpeedBox(int speed)
 {
-    int red, white, yellow;
+    extern int usemouse;
+    int bgcolor, bordercolor, red, black, white, yellow;
+    int box_x, box_y;
     int original_speed;
     int redline_x;
     int linelen;
+    int i;
+    boolean draw_acceleration = false;
 
+    // Get palette indices for colors for widget. These depend on the
+    // palette of the game being played.
+
+    bgcolor = I_GetPaletteIndex(0x77, 0x77, 0x77);
+    bordercolor = I_GetPaletteIndex(0x55, 0x55, 0x55);
     red = I_GetPaletteIndex(0xff, 0x00, 0x00);
-    white = I_GetPaletteIndex(0xff, 0xff, 0xff);
+    black = I_GetPaletteIndex(0x00, 0x00, 0x00);
     yellow = I_GetPaletteIndex(0xff, 0xff, 0x00);
+    white = I_GetPaletteIndex(0xff, 0xff, 0xff);
+
+    // If the mouse is turned off, don't draw the box at all.
+    if (!usemouse)
+    {
+        return;
+    }
+
+    // If acceleration is used, draw a box that helps to calibrate the
+    // threshold point.
+    if (mouse_threshold > 0 && fabs(mouse_acceleration - 1) > 0.01)
+    {
+        draw_acceleration = true;
+    }
+
+    // Calculate box position
+
+    box_x = SCREENWIDTH - MOUSE_SPEED_BOX_WIDTH - 10;
+    box_y = 15;
+
+    V_DrawFilledBox(box_x, box_y,
+                    MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bgcolor);
+    V_DrawBox(box_x, box_y,
+              MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bordercolor);
 
     // Calculate the position of the red threshold line when calibrating
     // acceleration.  This is 1/3 of the way along the box.
 
     redline_x = MOUSE_SPEED_BOX_WIDTH / 3;
 
-    if (speed >= mouse_threshold)
+    // Calculate line length
+
+    if (draw_acceleration && speed >= mouse_threshold)
     {
         // Undo acceleration and get back the original mouse speed
         original_speed = speed - mouse_threshold;
@@ -929,97 +969,50 @@ static void DrawAcceleratingBox(int speed)
     }
     else
     {
-        linelen = (speed * redline_x) / mouse_threshold;
+        linelen = speed / linelen_multiplier;
     }
 
-    // Horizontal "thermometer"
+    // Draw horizontal "thermometer" 
+
     if (linelen > MOUSE_SPEED_BOX_WIDTH - 1)
     {
         linelen = MOUSE_SPEED_BOX_WIDTH - 1;
+        if (!draw_acceleration)
+        {
+            linelen_multiplier++;
+        }
     }
 
-    if (linelen < redline_x)
+    V_DrawHorizLine(box_x + 1, box_y + 4, MOUSE_SPEED_BOX_WIDTH - 2, black);
+
+    if (!draw_acceleration || linelen < redline_x)
     {
-        V_DrawHorizLine(MOUSE_SPEED_BOX_X + 1,
-                        MOUSE_SPEED_BOX_Y + MOUSE_SPEED_BOX_HEIGHT / 2,
+        V_DrawHorizLine(box_x + 1, box_y + MOUSE_SPEED_BOX_HEIGHT / 2,
                         linelen, white);
     }
     else
     {
-        V_DrawHorizLine(MOUSE_SPEED_BOX_X + 1,
-                        MOUSE_SPEED_BOX_Y + MOUSE_SPEED_BOX_HEIGHT / 2,
+        V_DrawHorizLine(box_x + 1, box_y + MOUSE_SPEED_BOX_HEIGHT / 2,
                         redline_x, white);
-        V_DrawHorizLine(MOUSE_SPEED_BOX_X + redline_x,
-                        MOUSE_SPEED_BOX_Y + MOUSE_SPEED_BOX_HEIGHT / 2,
+        V_DrawHorizLine(box_x + redline_x, box_y + MOUSE_SPEED_BOX_HEIGHT / 2,
                         linelen - redline_x, yellow);
     }
 
-    // Draw acceleration threshold line
-    V_DrawVertLine(MOUSE_SPEED_BOX_X + redline_x, MOUSE_SPEED_BOX_Y + 1,
-                   MOUSE_SPEED_BOX_HEIGHT - 2, red);
-}
-
-// Highest seen mouse turn speed. We scale the range of the thermometer
-// according to this value, so that it never exceeds the range. Initially
-// this is set to a 1:1 setting where 1 pixel = 1 unit of speed.
-static int max_seen_speed = MOUSE_SPEED_BOX_WIDTH - 1;
-
-static void DrawNonAcceleratingBox(int speed)
-{
-    int white;
-    int linelen;
-
-    white = I_GetPaletteIndex(0xff, 0xff, 0xff);
-
-    if (speed > max_seen_speed)
+    if (draw_acceleration)
     {
-        max_seen_speed = speed;
-    }
-
-    // Draw horizontal "thermometer":
-    linelen = speed * (MOUSE_SPEED_BOX_WIDTH - 1) / max_seen_speed;
-
-    V_DrawHorizLine(MOUSE_SPEED_BOX_X + 1,
-                    MOUSE_SPEED_BOX_Y + MOUSE_SPEED_BOX_HEIGHT / 2,
-                    linelen, white);
-}
-
-void V_DrawMouseSpeedBox(int speed)
-{
-    extern int usemouse;
-    int bgcolor, bordercolor, black;
-
-    // If the mouse is turned off, don't draw the box at all.
-    if (!usemouse)
-    {
-        return;
-    }
-
-    // Get palette indices for colors for widget. These depend on the
-    // palette of the game being played.
-
-    bgcolor = I_GetPaletteIndex(0x77, 0x77, 0x77);
-    bordercolor = I_GetPaletteIndex(0x55, 0x55, 0x55);
-    black = I_GetPaletteIndex(0x00, 0x00, 0x00);
-
-    // Calculate box position
-
-    V_DrawFilledBox(MOUSE_SPEED_BOX_X, MOUSE_SPEED_BOX_Y,
-                    MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bgcolor);
-    V_DrawBox(MOUSE_SPEED_BOX_X, MOUSE_SPEED_BOX_Y,
-              MOUSE_SPEED_BOX_WIDTH, MOUSE_SPEED_BOX_HEIGHT, bordercolor);
-    V_DrawHorizLine(MOUSE_SPEED_BOX_X + 1, MOUSE_SPEED_BOX_Y + 4,
-                    MOUSE_SPEED_BOX_WIDTH - 2, black);
-
-    // If acceleration is used, draw a box that helps to calibrate the
-    // threshold point.
-    if (mouse_threshold > 0 && fabs(mouse_acceleration - 1) > 0.01)
-    {
-        DrawAcceleratingBox(speed);
+        // Draw acceleration threshold line
+        V_DrawVertLine(box_x + redline_x, box_y + 1,
+                       MOUSE_SPEED_BOX_HEIGHT - 2, red);
     }
     else
     {
-        DrawNonAcceleratingBox(speed);
+        // Draw multiplier lines to indicate current resolution
+        for (i = 1; i < linelen_multiplier; i++)
+        {
+            V_DrawVertLine(
+                box_x + (i * MOUSE_SPEED_BOX_WIDTH / linelen_multiplier),
+                box_y + 1, MOUSE_SPEED_BOX_HEIGHT - 2, yellow);
+        }
     }
 }
 

@@ -9,7 +9,7 @@ SUBDIRS = fonts . examples
 
 noinst_LIBRARIES=libtextscreen.a
 
-EXTRA_DIST=CMakeLists.txt Doxyfile
+EXTRA_DIST=Doxyfile
 
 libtextscreen_a_SOURCES =                                 \
 	textscreen.h                                      \

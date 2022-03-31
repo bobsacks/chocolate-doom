@@ -93,7 +93,7 @@ extern boolean askforquit;
 // PUBLIC DATA DEFINITIONS -------------------------------------------------
 
 GameMode_t gamemode;
-static const char *gamedescription;
+char *gamedescription;
 char *iwadfile;
 static char demolumpname[9];    // Demo lump to start playing.
 boolean nomonsters;             // checkparm of -nomonsters
@@ -119,26 +119,10 @@ int maxplayers = MAXPLAYERS;
 static int WarpMap;
 static int demosequence;
 static int pagetic;
-static const char *pagename;
+static char *pagename;
 static char *SavePathConfig;
 
 // CODE --------------------------------------------------------------------
-
-
-static const char * const chat_macro_defaults[10] =
-{
-    HUSTR_CHATMACRO0,
-    HUSTR_CHATMACRO1,
-    HUSTR_CHATMACRO2,
-    HUSTR_CHATMACRO3,
-    HUSTR_CHATMACRO4,
-    HUSTR_CHATMACRO5,
-    HUSTR_CHATMACRO6,
-    HUSTR_CHATMACRO7,
-    HUSTR_CHATMACRO8,
-    HUSTR_CHATMACRO9,
-};
-
 
 void D_BindVariables(void)
 {
@@ -188,7 +172,6 @@ void D_BindVariables(void)
     {
         char buf[12];
 
-        chat_macros[i] = M_StringDuplicate(chat_macro_defaults[i]);
         M_snprintf(buf, sizeof(buf), "chatmacro%i", i);
         M_BindStringVariable(buf, &chat_macros[i]);
     }
@@ -388,7 +371,6 @@ void D_DoomMain(void)
 #ifdef _WIN32
 
     //!
-    // @category obscure
     // @platform windows
     // @vanilla
     //
@@ -439,27 +421,7 @@ void D_DoomMain(void)
     D_SetGameDescription();
     AdjustForMacIWAD();
 
-    //!
-    // @category mod
-    //
-    // Disable auto-loading of .wad files.
-    //
-    if (!M_ParmExists("-noautoload"))
-    {
-        char *autoload_dir;
-        autoload_dir = M_GetAutoloadDir("hexen.wad");
-        if (autoload_dir != NULL)
-        {
-            // TODO? DEH_AutoLoadPatches(autoload_dir);
-            W_AutoLoadWADs(autoload_dir);
-            free(autoload_dir);
-        }
-    }
-
     HandleArgs();
-
-    // Generate the WAD hash table.  Speed things up a bit.
-    W_GenerateHashTable();
 
     I_PrintStartupBanner(gamedescription);
 
@@ -524,14 +486,6 @@ void D_DoomMain(void)
 
     CheckRecordFrom();
 
-    //!
-    // @arg <x>
-    // @category demo
-    // @vanilla
-    //
-    // Record a demo named x.lmp.
-    //
-
     p = M_CheckParm("-record");
     if (p && p < myargc - 1)
     {
@@ -555,7 +509,6 @@ void D_DoomMain(void)
     }
 
     //!
-    // @category game
     // @arg <s>
     // @vanilla
     //
@@ -596,7 +549,6 @@ static void HandleArgs(void)
     int p;
 
     //!
-    // @category game
     // @vanilla
     //
     // Disable monsters.
@@ -605,7 +557,6 @@ static void HandleArgs(void)
     nomonsters = M_ParmExists("-nomonsters");
 
     //!
-    // @category game
     // @vanilla
     //
     // Monsters respawn after being killed.
@@ -632,7 +583,6 @@ static void HandleArgs(void)
     ravpic = M_ParmExists("-ravpic");
 
     //!
-    // @category obscure
     // @vanilla
     //
     // Don't allow artifacts to be used when the run key is held down.
@@ -658,7 +608,6 @@ static void HandleArgs(void)
     W_ParseCommandLine();
 
     //!
-    // @category obscure
     // @vanilla
     // @arg <path>
     //
@@ -674,7 +623,6 @@ static void HandleArgs(void)
     }
 
     //!
-    // @category game
     // @arg <skill>
     // @vanilla
     //
@@ -774,14 +722,6 @@ static void WarpCheck(void)
 {
     int p;
     int map;
-
-    //!
-    // @category game
-    // @arg x
-    // @vanilla
-    //
-    // Start a game immediately, warping to MAPx.
-    //
 
     p = M_CheckParm("-warp");
     if (p && p < myargc - 1)
@@ -1104,14 +1044,6 @@ static void CheckRecordFrom(void)
 {
     int p;
 
-    //!
-    // @vanilla
-    // @category demo
-    // @arg <savenum> <demofile>
-    //
-    // Record a demo, loading from the given filename. Equivalent
-    // to -loadgame <savenum> -record <demofile>.
-    //
     p = M_CheckParm("-recordfrom");
     if (!p || p > myargc - 2)
     {                           // Bad args

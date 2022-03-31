@@ -49,7 +49,6 @@
 #include "m_argv.h"
 #include "m_controls.h"
 #include "p_saveg.h"
-#include "p_setup.h"
 
 #include "s_sound.h"
 
@@ -88,7 +87,7 @@ int			quickSaveSlot;
  // 1 = message to be printed
 int			messageToPrint;
 // ...and here is the message string!
-const char		*messageString;
+char*			messageString;
 
 // message x & y
 int			messx;
@@ -168,7 +167,7 @@ short		whichSkull;		// which skull to draw
 
 // graphic name of skulls
 // warning: initializer-string for array of chars is too long
-const char *skullName[2] = {"M_SKULL1","M_SKULL2"};
+char    *skullName[2] = {"M_SKULL1","M_SKULL2"};
 
 // current menudef
 menu_t*	currentMenu;                          
@@ -176,50 +175,54 @@ menu_t*	currentMenu;
 //
 // PROTOTYPES
 //
-static void M_NewGame(int choice);
-static void M_Episode(int choice);
-static void M_ChooseSkill(int choice);
-static void M_LoadGame(int choice);
-static void M_SaveGame(int choice);
-static void M_Options(int choice);
-static void M_EndGame(int choice);
-static void M_ReadThis(int choice);
-static void M_ReadThis2(int choice);
-static void M_QuitDOOM(int choice);
+void M_NewGame(int choice);
+void M_Episode(int choice);
+void M_ChooseSkill(int choice);
+void M_LoadGame(int choice);
+void M_SaveGame(int choice);
+void M_Options(int choice);
+void M_EndGame(int choice);
+void M_ReadThis(int choice);
+void M_ReadThis2(int choice);
+void M_QuitDOOM(int choice);
 
-static void M_ChangeMessages(int choice);
-static void M_ChangeSensitivity(int choice);
-static void M_SfxVol(int choice);
-static void M_MusicVol(int choice);
-static void M_ChangeDetail(int choice);
-static void M_SizeDisplay(int choice);
-static void M_Sound(int choice);
+void M_ChangeMessages(int choice);
+void M_ChangeSensitivity(int choice);
+void M_SfxVol(int choice);
+void M_MusicVol(int choice);
+void M_ChangeDetail(int choice);
+void M_SizeDisplay(int choice);
+void M_StartGame(int choice);
+void M_Sound(int choice);
 
-static void M_FinishReadThis(int choice);
-static void M_LoadSelect(int choice);
-static void M_SaveSelect(int choice);
-static void M_ReadSaveStrings(void);
-static void M_QuickSave(void);
-static void M_QuickLoad(void);
+void M_FinishReadThis(int choice);
+void M_LoadSelect(int choice);
+void M_SaveSelect(int choice);
+void M_ReadSaveStrings(void);
+void M_QuickSave(void);
+void M_QuickLoad(void);
 
-static void M_DrawMainMenu(void);
-static void M_DrawReadThis1(void);
-static void M_DrawReadThis2(void);
-static void M_DrawNewGame(void);
-static void M_DrawEpisode(void);
-static void M_DrawOptions(void);
-static void M_DrawSound(void);
-static void M_DrawLoad(void);
-static void M_DrawSave(void);
+void M_DrawMainMenu(void);
+void M_DrawReadThis1(void);
+void M_DrawReadThis2(void);
+void M_DrawNewGame(void);
+void M_DrawEpisode(void);
+void M_DrawOptions(void);
+void M_DrawSound(void);
+void M_DrawLoad(void);
+void M_DrawSave(void);
 
-static void M_DrawSaveLoadBorder(int x,int y);
-static void M_SetupNextMenu(menu_t *menudef);
-static void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
-static void M_WriteText(int x, int y, const char *string);
-static int  M_StringWidth(const char *string);
-static int  M_StringHeight(const char *string);
-static void M_StartMessage(const char *string, void *routine, boolean input);
-static void M_ClearMenus (void);
+void M_DrawSaveLoadBorder(int x,int y);
+void M_SetupNextMenu(menu_t *menudef);
+void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
+void M_DrawEmptyCell(menu_t *menu,int item);
+void M_DrawSelCell(menu_t *menu,int item);
+void M_WriteText(int x, int y, char *string);
+int  M_StringWidth(char *string);
+int  M_StringHeight(char *string);
+void M_StartMessage(char *string,void *routine,boolean input);
+void M_StopMessage(void);
+void M_ClearMenus (void);
 
 
 
@@ -507,7 +510,6 @@ void M_ReadSaveStrings(void)
 
     for (i = 0;i < load_end;i++)
     {
-        int retval;
         M_StringCopy(name, P_SaveGameFile(i), sizeof(name));
 
 	handle = fopen(name, "rb");
@@ -517,9 +519,9 @@ void M_ReadSaveStrings(void)
             LoadMenu[i].status = 0;
             continue;
         }
-        retval = fread(&savegamestrings[i], 1, SAVESTRINGSIZE, handle);
+	fread(&savegamestrings[i], 1, SAVESTRINGSIZE, handle);
 	fclose(handle);
-        LoadMenu[i].status = retval == SAVESTRINGSIZE;
+	LoadMenu[i].status = 1;
     }
 }
 
@@ -635,28 +637,8 @@ void M_DoSave(int slot)
 //
 static void SetDefaultSaveName(int slot)
 {
-    // map from IWAD or PWAD?
-    if (W_IsIWADLump(maplumpinfo) && strcmp(savegamedir, ""))
-    {
-        M_snprintf(savegamestrings[itemOn], SAVESTRINGSIZE,
-                   "%s", maplumpinfo->name);
-    }
-    else
-    {
-        char *wadname = M_StringDuplicate(W_WadNameForLump(maplumpinfo));
-        char *ext = strrchr(wadname, '.');
-
-        if (ext != NULL)
-        {
-            *ext = '\0';
-        }
-
-        M_snprintf(savegamestrings[itemOn], SAVESTRINGSIZE,
-                   "%s (%s)", maplumpinfo->name,
-                   wadname);
-        free(wadname);
-    }
-    M_ForceUppercase(savegamestrings[itemOn]);
+    M_snprintf(savegamestrings[itemOn], SAVESTRINGSIZE - 1,
+               "JOYSTICK SLOT %i", itemOn + 1);
     joypadSave = false;
 }
 
@@ -712,7 +694,7 @@ void M_SaveGame (int choice)
 //
 //      M_QuickSave
 //
-static char tempstring[90];
+char    tempstring[80];
 
 void M_QuickSaveResponse(int key)
 {
@@ -742,9 +724,8 @@ void M_QuickSave(void)
 	quickSaveSlot = -2;	// means to pick a slot now
 	return;
     }
-    DEH_snprintf(tempstring, sizeof(tempstring),
-                 QSPROMPT, savegamestrings[quickSaveSlot]);
-    M_StartMessage(tempstring, M_QuickSaveResponse, true);
+    DEH_snprintf(tempstring, 80, QSPROMPT, savegamestrings[quickSaveSlot]);
+    M_StartMessage(tempstring,M_QuickSaveResponse,true);
 }
 
 
@@ -775,9 +756,8 @@ void M_QuickLoad(void)
 	M_StartMessage(DEH_String(QSAVESPOT),NULL,false);
 	return;
     }
-    DEH_snprintf(tempstring, sizeof(tempstring),
-                 QLPROMPT, savegamestrings[quickSaveSlot]);
-    M_StartMessage(tempstring, M_QuickLoadResponse, true);
+    DEH_snprintf(tempstring, 80, QLPROMPT, savegamestrings[quickSaveSlot]);
+    M_StartMessage(tempstring,M_QuickLoadResponse,true);
 }
 
 
@@ -961,8 +941,8 @@ void M_Episode(int choice)
 //
 // M_Options
 //
-static const char *detailNames[2] = {"M_GDHIGH","M_GDLOW"};
-static const char *msgNames[2] = {"M_MSGOFF","M_MSGON"};
+static char *detailNames[2] = {"M_GDHIGH","M_GDLOW"};
+static char *msgNames[2] = {"M_MSGOFF","M_MSGON"};
 
 void M_DrawOptions(void)
 {
@@ -1112,9 +1092,9 @@ void M_QuitResponse(int key)
 }
 
 
-static const char *M_SelectEndMessage(void)
+static char *M_SelectEndMessage(void)
 {
-    const char **endmsg;
+    char **endmsg;
 
     if (logical_gamemission == doom)
     {
@@ -1233,9 +1213,29 @@ M_DrawThermo
 }
 
 
+
+void
+M_DrawEmptyCell
+( menu_t*	menu,
+  int		item )
+{
+    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 
+                      W_CacheLumpName(DEH_String("M_CELL1"), PU_CACHE));
+}
+
+void
+M_DrawSelCell
+( menu_t*	menu,
+  int		item )
+{
+    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT - 1,
+                      W_CacheLumpName(DEH_String("M_CELL2"), PU_CACHE));
+}
+
+
 void
 M_StartMessage
-( const char	*string,
+( char*		string,
   void*		routine,
   boolean	input )
 {
@@ -1249,10 +1249,18 @@ M_StartMessage
 }
 
 
+void M_StopMessage(void)
+{
+    menuactive = messageLastMenuActive;
+    messageToPrint = 0;
+}
+
+
+
 //
 // Find string width from hu_font chars
 //
-int M_StringWidth(const char *string)
+int M_StringWidth(char* string)
 {
     size_t             i;
     int             w = 0;
@@ -1275,7 +1283,7 @@ int M_StringWidth(const char *string)
 //
 //      Find string height from hu_font chars
 //
-int M_StringHeight(const char* string)
+int M_StringHeight(char* string)
 {
     size_t             i;
     int             h;
@@ -1297,10 +1305,10 @@ void
 M_WriteText
 ( int		x,
   int		y,
-  const char *string)
+  char*		string)
 {
     int		w;
-    const char *ch;
+    char*	ch;
     int		c;
     int		cx;
     int		cy;
@@ -1408,73 +1416,71 @@ boolean M_Responder (event_t* ev)
     {
         // Simulate key presses from joystick events to interact with the menu.
 
-        if (menuactive)
-        {
-            if (ev->data3 < 0)
-            {
-                key = key_menu_up;
-                joywait = I_GetTime() + 5;
-            }
-            else if (ev->data3 > 0)
-            {
-                key = key_menu_down;
-                joywait = I_GetTime() + 5;
-            }
-            if (ev->data2 < 0)
-            {
-                key = key_menu_left;
-                joywait = I_GetTime() + 2;
-            }
-            else if (ev->data2 > 0)
-            {
-                key = key_menu_right;
-                joywait = I_GetTime() + 2;
-            }
+	if (ev->data3 < 0)
+	{
+	    key = key_menu_up;
+	    joywait = I_GetTime() + 5;
+	}
+	else if (ev->data3 > 0)
+	{
+	    key = key_menu_down;
+	    joywait = I_GetTime() + 5;
+	}
+		
+	if (ev->data2 < 0)
+	{
+	    key = key_menu_left;
+	    joywait = I_GetTime() + 2;
+	}
+	else if (ev->data2 > 0)
+	{
+	    key = key_menu_right;
+	    joywait = I_GetTime() + 2;
+	}
 
 #define JOY_BUTTON_MAPPED(x) ((x) >= 0)
 #define JOY_BUTTON_PRESSED(x) (JOY_BUTTON_MAPPED(x) && (ev->data1 & (1 << (x))) != 0)
 
-            if (JOY_BUTTON_PRESSED(joybfire))
+        if (JOY_BUTTON_PRESSED(joybfire))
+        {
+            // Simulate a 'Y' keypress when Doom show a Y/N dialog with Fire button.
+            if (messageToPrint && messageNeedsInput)
             {
-                // Simulate a 'Y' keypress when Doom show a Y/N dialog with Fire button.
-                if (messageToPrint && messageNeedsInput)
-                {
-                    key = key_menu_confirm;
-                }
-                // Simulate pressing "Enter" when we are supplying a save slot name
-                else if (saveStringEnter)
-                {
-                    key = KEY_ENTER;
-                }
-                else
-                {
-                    // if selecting a save slot via joypad, set a flag
-                    if (currentMenu == &SaveDef)
-                    {
-                        joypadSave = true;
-                    }
-                    key = key_menu_forward;
-                }
-                joywait = I_GetTime() + 5;
+                key = key_menu_confirm;
             }
-            if (JOY_BUTTON_PRESSED(joybuse))
+            // Simulate pressing "Enter" when we are supplying a save slot name
+            else if (saveStringEnter)
             {
-                // Simulate a 'N' keypress when Doom show a Y/N dialog with Use button.
-                if (messageToPrint && messageNeedsInput)
-                {
-                    key = key_menu_abort;
-                }
-                // If user was entering a save name, back out
-                else if (saveStringEnter)
-                {
-                    key = KEY_ESCAPE;
-                }
-                else
-                {
-                    key = key_menu_back;
-                }
-                joywait = I_GetTime() + 5;
+                key = KEY_ENTER;
             }
+            else
+            {
+                // if selecting a save slot via joypad, set a flag
+                if (currentMenu == &SaveDef)
+                {
+                    joypadSave = true;
+                }
+                key = key_menu_forward;
+            }
+            joywait = I_GetTime() + 5;
+        }
+        if (JOY_BUTTON_PRESSED(joybuse))
+        {
+            // Simulate a 'N' keypress when Doom show a Y/N dialog with Use button.
+            if (messageToPrint && messageNeedsInput)
+            {
+                key = key_menu_abort;
+            }
+            // If user was entering a save name, back out
+            else if (saveStringEnter)
+            {
+                key = KEY_ESCAPE;
+            }
+            else
+            {
+                key = key_menu_back;
+            }
+            joywait = I_GetTime() + 5;
         }
         if (JOY_BUTTON_PRESSED(joybmenu))
         {
@@ -1941,7 +1947,7 @@ void M_Drawer (void)
     unsigned int	i;
     unsigned int	max;
     char		string[80];
-    const char          *name;
+    char               *name;
     int			start;
 
     inhelpscreens = false;
@@ -1953,9 +1959,9 @@ void M_Drawer (void)
 	y = SCREENHEIGHT/2 - M_StringHeight(messageString) / 2;
 	while (messageString[start] != '\0')
 	{
-	    boolean foundnewline = false;
+	    int foundnewline = 0;
 
-            for (i = 0; messageString[start + i] != '\0'; i++)
+            for (i = 0; i < strlen(messageString + start); i++)
             {
                 if (messageString[start + i] == '\n')
                 {
@@ -1966,7 +1972,7 @@ void M_Drawer (void)
                         string[i] = '\0';
                     }
 
-                    foundnewline = true;
+                    foundnewline = 1;
                     start += i + 1;
                     break;
                 }
@@ -2006,7 +2012,7 @@ void M_Drawer (void)
     {
         name = DEH_String(currentMenu->menuitems[i].name);
 
-	if (name[0] && W_CheckNumForName(name) > 0)
+	if (name[0])
 	{
 	    V_DrawPatchDirect (x, y, W_CacheLumpName(name, PU_CACHE));
 	}

@@ -24,7 +24,6 @@
 #include <ctype.h>
 #include <errno.h>
 #include <assert.h>
-#include <locale.h>
 
 #include "SDL_filesystem.h"
 
@@ -34,7 +33,6 @@
 #include "doomkeys.h"
 #include "i_system.h"
 #include "m_argv.h"
-#include "m_config.h"
 #include "m_misc.h"
 
 #include "z_zone.h"
@@ -46,14 +44,12 @@
 // Location where all configuration data is stored - 
 // default.cfg, savegames, etc.
 
-const char *configdir;
-
-static char *autoload_path = "";
+char *configdir;
 
 // Default filenames for configuration files.
 
-static const char *default_main_config;
-static const char *default_extra_config;
+static char *default_main_config;
+static char *default_extra_config;
 
 typedef enum 
 {
@@ -67,7 +63,7 @@ typedef enum
 typedef struct
 {
     // Name of the variable
-    const char *name;
+    char *name;
 
     // Pointer to the location in memory of the variable
     union {
@@ -99,7 +95,7 @@ typedef struct
 {
     default_t *defaults;
     int numdefaults;
-    const char *filename;
+    char *filename;
 } default_collection_t;
 
 #define CONFIG_VARIABLE_GENERIC(name, type) \
@@ -441,13 +437,6 @@ static default_t	doom_defaults_list[] =
     //
 
     CONFIG_VARIABLE_INT(mouseb_forward),
-
-    //!
-    // Mouse button to turn on running.  When held down, the player
-    // will run while moving.
-    //
-
-    CONFIG_VARIABLE_INT(mouseb_speed),
 
     //!
     // @game hexen strife
@@ -920,14 +909,6 @@ static default_t extra_defaults_list[] =
     CONFIG_VARIABLE_FLOAT(libsamplerate_scale),
 
     //!
-    // Full path to a directory in which WAD files and dehacked patches
-    // can be placed to be automatically loaded on startup. A subdirectory
-    // of this directory matching the IWAD name is checked to find the
-    // files to load.
-
-    CONFIG_VARIABLE_STRING(autoload_path),
-
-    //!
     // Full path to a directory containing configuration files for
     // substitute music packs. These packs contain high quality renderings
     // of game music to be played instead of using the system's built-in
@@ -935,12 +916,6 @@ static default_t extra_defaults_list[] =
     //
 
     CONFIG_VARIABLE_STRING(music_pack_path),
-
-    //!
-    // Full path to a soundfont file to use with FluidSynth MIDI playback.
-    //
-
-    CONFIG_VARIABLE_STRING(fluidsynth_sf_path),
 
     //!
     // Full path to a Timidity configuration file to use for MIDI
@@ -1047,18 +1022,6 @@ static default_t extra_defaults_list[] =
     CONFIG_VARIABLE_INT(mouseb_straferight),
 
     //!
-    // Mouse button to turn left.
-    //
-
-    CONFIG_VARIABLE_INT(mouseb_turnleft),
-
-    //!
-    // Mouse button to turn right.
-    //
-
-    CONFIG_VARIABLE_INT(mouseb_turnright),
-
-    //!
     // Mouse button to "use" an object, eg. a door or switch.
     //
 
@@ -1081,22 +1044,6 @@ static default_t extra_defaults_list[] =
     //
 
     CONFIG_VARIABLE_INT(mouseb_nextweapon),
-    
-    //!
-    // @game heretic
-    //
-    // Mouse button to move to the left in the inventory.
-    //
-
-    CONFIG_VARIABLE_INT(mouseb_invleft),
-
-    //!
-    // @game heretic
-    //
-    // Mouse button to move to the right in the inventory.
-    //
-
-    CONFIG_VARIABLE_INT(mouseb_invright),
 
     //!
     // If non-zero, double-clicking a mouse button acts like pressing
@@ -1553,6 +1500,13 @@ static default_t extra_defaults_list[] =
 
     CONFIG_VARIABLE_KEY(key_weapon8),
 
+
+  //!
+    // Key to select weapon 9.
+    //
+
+    CONFIG_VARIABLE_KEY(key_weapon9),
+
     //!
     // Key to cycle to the previous weapon.
     //
@@ -1564,86 +1518,6 @@ static default_t extra_defaults_list[] =
     //
 
     CONFIG_VARIABLE_KEY(key_nextweapon),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "quartz flask" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_quartz),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "mystic urn" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_urn),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "timebomb of the ancients" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_bomb),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "tome of power" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_tome),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "ring of invincibility" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_ring),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "chaos device" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_chaosdevice),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "shadowsphere" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_shadowsphere),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "wings of wrath" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_wings),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "torch" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_torch),
-
-    //!
-    // @game heretic
-    //
-    // Key to use "morph ovum" artifact.
-    //
-
-    CONFIG_VARIABLE_KEY(key_arti_morph),
 
     //!
     // @game hexen
@@ -1793,7 +1667,7 @@ static default_collection_t extra_defaults =
 
 // Search a collection for a variable
 
-static default_t *SearchCollection(default_collection_t *collection, const char *name)
+static default_t *SearchCollection(default_collection_t *collection, char *name)
 {
     int i;
 
@@ -1944,19 +1818,19 @@ static void SaveDefaultCollection(default_collection_t *collection)
 
 // Parses integer values in the configuration file
 
-static int ParseIntParameter(const char *strparm)
+static int ParseIntParameter(char *strparm)
 {
     int parm;
 
     if (strparm[0] == '0' && strparm[1] == 'x')
-        sscanf(strparm+2, "%x", (unsigned int *) &parm);
+        sscanf(strparm+2, "%x", &parm);
     else
         sscanf(strparm, "%i", &parm);
 
     return parm;
 }
 
-static void SetVariable(default_t *def, const char *value)
+static void SetVariable(default_t *def, char *value)
 {
     int intparm;
 
@@ -1994,41 +1868,7 @@ static void SetVariable(default_t *def, const char *value)
             break;
 
         case DEFAULT_FLOAT:
-        {
-            // Different locales use different decimal separators.
-            // However, the choice of the current locale isn't always
-            // under our own control. If the atof() function fails to
-            // parse the string representing the floating point number
-            // using the current locale's decimal separator, it will
-            // return 0, resulting in silent sound effects. To
-            // mitigate this, we replace the first non-digit,
-            // non-minus character in the string with the current
-            // locale's decimal separator before passing it to atof().
-            struct lconv *lc = localeconv();
-            char dec, *str;
-            int i = 0;
-
-            dec = lc->decimal_point[0];
-            str = M_StringDuplicate(value);
-
-            // Skip sign indicators.
-            if (str[i] == '-' || str[i] == '+')
-            {
-                i++;
-            }
-
-            for ( ; str[i] != '\0'; i++)
-            {
-                if (!isdigit(str[i]))
-                {
-                    str[i] = dec;
-                    break;
-                }
-            }
-
-            *def->location.f = (float) atof(str);
-            free(str);
-        }
+            *def->location.f = (float) atof(value);
             break;
     }
 }
@@ -2096,7 +1936,7 @@ static void LoadDefaultCollection(default_collection_t *collection)
 
 // Set the default filenames to use for configuration files.
 
-void M_SetConfigFilenames(const char *main_config, const char *extra_config)
+void M_SetConfigFilenames(char *main_config, char *extra_config)
 {
     default_main_config = main_config;
     default_extra_config = extra_config;
@@ -2116,10 +1956,10 @@ void M_SaveDefaults (void)
 // Save defaults to alternate filenames
 //
 
-void M_SaveDefaultsAlternate(const char *main, const char *extra)
+void M_SaveDefaultsAlternate(char *main, char *extra)
 {
-    const char *orig_main;
-    const char *orig_extra;
+    char *orig_main;
+    char *orig_extra;
 
     // Temporarily change the filenames
 
@@ -2144,10 +1984,7 @@ void M_SaveDefaultsAlternate(const char *main, const char *extra)
 void M_LoadDefaults (void)
 {
     int i;
-
-    // This variable is a special snowflake for no good reason.
-    M_BindStringVariable("autoload_path", &autoload_path);
-
+ 
     // check for a custom default file
 
     //!
@@ -2200,7 +2037,7 @@ void M_LoadDefaults (void)
 
 // Get a configuration file variable by its name
 
-static default_t *GetDefaultForName(const char *name)
+static default_t *GetDefaultForName(char *name)
 {
     default_t *result;
 
@@ -2227,7 +2064,7 @@ static default_t *GetDefaultForName(const char *name)
 // Bind a variable to a given configuration file variable, by name.
 //
 
-void M_BindIntVariable(const char *name, int *location)
+void M_BindIntVariable(char *name, int *location)
 {
     default_t *variable;
 
@@ -2240,7 +2077,7 @@ void M_BindIntVariable(const char *name, int *location)
     variable->bound = true;
 }
 
-void M_BindFloatVariable(const char *name, float *location)
+void M_BindFloatVariable(char *name, float *location)
 {
     default_t *variable;
 
@@ -2251,7 +2088,7 @@ void M_BindFloatVariable(const char *name, float *location)
     variable->bound = true;
 }
 
-void M_BindStringVariable(const char *name, char **location)
+void M_BindStringVariable(char *name, char **location)
 {
     default_t *variable;
 
@@ -2265,7 +2102,7 @@ void M_BindStringVariable(const char *name, char **location)
 // Set the value of a particular variable; an API function for other
 // parts of the program to assign values to config variables by name.
 
-boolean M_SetVariable(const char *name, const char *value)
+boolean M_SetVariable(char *name, char *value)
 {
     default_t *variable;
 
@@ -2283,7 +2120,7 @@ boolean M_SetVariable(const char *name, const char *value)
 
 // Get the value of a variable.
 
-int M_GetIntVariable(const char *name)
+int M_GetIntVariable(char *name)
 {
     default_t *variable;
 
@@ -2298,7 +2135,7 @@ int M_GetIntVariable(const char *name)
     return *variable->location.i;
 }
 
-const char *M_GetStringVariable(const char *name)
+const char *M_GetStringVariable(char *name)
 {
     default_t *variable;
 
@@ -2313,7 +2150,7 @@ const char *M_GetStringVariable(const char *name)
     return *variable->location.s;
 }
 
-float M_GetFloatVariable(const char *name)
+float M_GetFloatVariable(char *name)
 {
     default_t *variable;
 
@@ -2341,17 +2178,11 @@ static char *GetDefaultConfigDir(void)
     // Vanilla Doom and save in the current directory.
 
     char *result;
-    char *copy;
 
     result = SDL_GetPrefPath("", PACKAGE_TARNAME);
-    if (result != NULL)
-    {
-        copy = M_StringDuplicate(result);
-        SDL_free(result);
-        return copy;
-    }
+    return result;
 #endif /* #ifndef _WIN32 */
-    return M_StringDuplicate(exedir);
+    return M_StringDuplicate("");
 }
 
 // 
@@ -2361,7 +2192,7 @@ static char *GetDefaultConfigDir(void)
 // files are stored - default.cfg, chocolate-doom.cfg, savegames, etc.
 //
 
-void M_SetConfigDir(const char *dir)
+void M_SetConfigDir(char *dir)
 {
     // Use the directory that was passed, or find the default.
 
@@ -2374,7 +2205,7 @@ void M_SetConfigDir(const char *dir)
         configdir = GetDefaultConfigDir();
     }
 
-    if (strcmp(configdir, exedir) != 0)
+    if (strcmp(configdir, "") != 0)
     {
         printf("Using %s for configuration and saves\n", configdir);
     }
@@ -2384,56 +2215,12 @@ void M_SetConfigDir(const char *dir)
     M_MakeDirectory(configdir);
 }
 
-#define MUSIC_PACK_README \
-"Extract music packs into this directory in .flac or .ogg format;\n"   \
-"they will be automatically loaded based on filename to replace the\n" \
-"in-game music with high quality versions.\n\n" \
-"For more information check here:\n\n" \
-"  <https://www.chocolate-doom.org/wiki/index.php/Digital_music_packs>\n\n"
-
-// Set the value of music_pack_path if it is currently empty, and create
-// the directory if necessary.
-void M_SetMusicPackDir(void)
-{
-    const char *current_path;
-    char *prefdir, *music_pack_path, *readme_path;
-
-    current_path = M_GetStringVariable("music_pack_path");
-
-    if (current_path != NULL && strlen(current_path) > 0)
-    {
-        return;
-    }
-
-    prefdir = SDL_GetPrefPath("", PACKAGE_TARNAME);
-    if (prefdir == NULL)
-    {
-        printf("M_SetMusicPackDir: SDL_GetPrefPath failed, music pack directory not set\n");
-        return;
-    }
-    music_pack_path = M_StringJoin(prefdir, "music-packs", NULL);
-
-    M_MakeDirectory(prefdir);
-    M_MakeDirectory(music_pack_path);
-    M_SetVariable("music_pack_path", music_pack_path);
-
-    // We write a README file with some basic instructions on how to use
-    // the directory.
-    readme_path = M_StringJoin(music_pack_path, DIR_SEPARATOR_S,
-                               "README.txt", NULL);
-    M_WriteFile(readme_path, MUSIC_PACK_README, strlen(MUSIC_PACK_README));
-
-    free(readme_path);
-    free(music_pack_path);
-    SDL_free(prefdir);
-}
-
 //
 // Calculate the path to the directory to use to store save games.
 // Creates the directory as necessary.
 //
 
-char *M_GetSaveGameDir(const char *iwadname)
+char *M_GetSaveGameDir(char *iwadname)
 {
     char *savegamedir;
     char *topdir;
@@ -2466,12 +2253,12 @@ char *M_GetSaveGameDir(const char *iwadname)
 
     else if (M_ParmExists("-cdrom"))
     {
-        savegamedir = M_StringDuplicate(configdir);
+        savegamedir = configdir;
     }
 #endif
     // If not "doing" a configuration directory (Windows), don't "do"
     // a savegame directory, either.
-    else if (!strcmp(configdir, exedir))
+    else if (!strcmp(configdir, ""))
     {
 	savegamedir = M_StringDuplicate("");
     }
@@ -2493,36 +2280,5 @@ char *M_GetSaveGameDir(const char *iwadname)
     }
 
     return savegamedir;
-}
-
-//
-// Calculate the path to the directory for autoloaded WADs/DEHs.
-// Creates the directory as necessary.
-//
-char *M_GetAutoloadDir(const char *iwadname)
-{
-    char *result;
-
-    if (autoload_path == NULL || strlen(autoload_path) == 0)
-    {
-        char *prefdir;
-        prefdir = SDL_GetPrefPath("", PACKAGE_TARNAME);
-        if (prefdir == NULL)
-        {
-            printf("M_GetAutoloadDir: SDL_GetPrefPath failed\n");
-            return NULL;
-        }
-        autoload_path = M_StringJoin(prefdir, "autoload", NULL);
-        SDL_free(prefdir);
-    }
-
-    M_MakeDirectory(autoload_path);
-
-    result = M_StringJoin(autoload_path, DIR_SEPARATOR_S, iwadname, NULL);
-    M_MakeDirectory(result);
-
-    // TODO: Add README file
-
-    return result;
 }
 

@@ -35,10 +35,8 @@
 
 void TXT_SetWindowAction(txt_window_t *window,
                          txt_horiz_align_t position, 
-                         TXT_UNCAST_ARG(action))
+                         txt_window_action_t *action)
 {
-    TXT_CAST_ARG(txt_widget_t, action);
-
     if (window->actions[position] != NULL)
     {
         TXT_DestroyWidget(window->actions[position]);
@@ -50,11 +48,11 @@ void TXT_SetWindowAction(txt_window_t *window,
 
     if (action != NULL)
     {
-        action->parent = &window->table.widget;
+        action->widget.parent = &window->table.widget;
     }
 }
 
-txt_window_t *TXT_NewWindow(const char *title)
+txt_window_t *TXT_NewWindow(char *title)
 {
     int i;
 
@@ -84,9 +82,7 @@ txt_window_t *TXT_NewWindow(const char *title)
     TXT_AddWidget(win, TXT_NewSeparator(NULL));
 
     for (i=0; i<3; ++i)
-    {
         win->actions[i] = NULL;
-    }
 
     TXT_AddDesktopWindow(win);
 
@@ -168,7 +164,7 @@ static void LayoutActionArea(txt_window_t *window)
 
     if (window->actions[TXT_HORIZ_LEFT] != NULL)
     {
-        widget = window->actions[TXT_HORIZ_LEFT];
+        widget = (txt_widget_t *) window->actions[TXT_HORIZ_LEFT];
 
         TXT_CalcWidgetSize(widget);
 
@@ -176,17 +172,16 @@ static void LayoutActionArea(txt_window_t *window)
         widget->y = window->window_y + window->window_h - widget->h - 1;
 
         // Adjust available space:
+
         space_available -= widget->w;
         space_left_offset += widget->w;
-
-        TXT_LayoutWidget(widget);
     }
 
     // Draw the right action
 
     if (window->actions[TXT_HORIZ_RIGHT] != NULL)
     {
-        widget = window->actions[TXT_HORIZ_RIGHT];
+        widget = (txt_widget_t *) window->actions[TXT_HORIZ_RIGHT];
 
         TXT_CalcWidgetSize(widget);
 
@@ -194,27 +189,25 @@ static void LayoutActionArea(txt_window_t *window)
         widget->y = window->window_y + window->window_h - widget->h - 1;
 
         // Adjust available space:
-        space_available -= widget->w;
 
-        TXT_LayoutWidget(widget);
+        space_available -= widget->w;
     }
 
     // Draw the center action
 
     if (window->actions[TXT_HORIZ_CENTER] != NULL)
     {
-        widget = window->actions[TXT_HORIZ_CENTER];
+        widget = (txt_widget_t *) window->actions[TXT_HORIZ_CENTER];
 
         TXT_CalcWidgetSize(widget);
 
         // The left and right widgets have left a space sandwiched between
         // them.  Center this widget within that space.
+
         widget->x = window->window_x
                   + space_left_offset
                   + (space_available - widget->w) / 2;
         widget->y = window->window_y + window->window_h - widget->h - 1;
-
-        TXT_LayoutWidget(widget);
     }
 }
 
@@ -424,7 +417,7 @@ static int MouseButtonPress(txt_window_t *window, int b)
 
     for (i=0; i<3; ++i)
     {
-        widget = window->actions[i];
+        widget = (txt_widget_t *) window->actions[i];
 
         if (widget != NULL
          && x >= widget->x && x < (signed) (widget->x + widget->w)
@@ -515,25 +508,24 @@ void TXT_SetWindowFocus(txt_window_t *window, int focused)
     TXT_SetWidgetFocus(window, focused);
 }
 
-void TXT_SetWindowHelpURL(txt_window_t *window, const char *help_url)
+void TXT_SetWindowHelpURL(txt_window_t *window, char *help_url)
 {
     window->help_url = help_url;
 }
 
 #ifdef _WIN32
 
-void TXT_OpenURL(const char *url)
+void TXT_OpenURL(char *url)
 {
     ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
 }
 
 #else
 
-void TXT_OpenURL(const char *url)
+void TXT_OpenURL(char *url)
 {
     char *cmd;
     size_t cmd_len;
-    int retval;
 
     cmd_len = strlen(url) + 30;
     cmd = malloc(cmd_len);
@@ -554,13 +546,8 @@ void TXT_OpenURL(const char *url)
     TXT_snprintf(cmd, cmd_len, "xdg-open \"%s\"", url);
 #endif
 
-    retval = system(cmd);
+    system(cmd);
     free(cmd);
-    if (retval != 0)
-    {
-        fprintf(stderr, "TXT_OpenURL: error executing '%s'; return code %d\n",
-            cmd, retval);
-    }
 }
 
 #endif /* #ifndef _WIN32 */
@@ -573,7 +560,7 @@ void TXT_OpenWindowHelpURL(txt_window_t *window)
     }
 }
 
-txt_window_t *TXT_MessageBox(const char *title, const char *message, ...)
+txt_window_t *TXT_MessageBox(char *title, char *message, ...)
 {
     txt_window_t *window;
     char buf[256];

@@ -38,7 +38,6 @@
 #include "i_system.h"
 #include "i_timer.h"
 #include "i_input.h"
-#include "i_swap.h"
 #include "i_video.h"
 
 #include "p_setup.h"
@@ -168,6 +167,7 @@ static int *weapon_keys[] = {
     &key_weapon6,
     &key_weapon7,
     &key_weapon8
+//    &key_weapon9
 };
 
 // Set to -1 or +1 to switch to the previous or next weapon.
@@ -189,7 +189,9 @@ static const struct
     { wp_chaingun,        wp_chaingun },
     { wp_missile,         wp_missile },
     { wp_plasma,          wp_plasma },
+    { wp_flames,           wp_flames},    
     { wp_bfg,             wp_bfg }
+//     { wp_flames,           wp_flames}
 };
 
 #define SLOWTURNTICS	6 
@@ -345,8 +347,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     speed = key_speed >= NUMKEYS
          || joybspeed >= MAX_JOY_BUTTONS
          || gamekeydown[key_speed] 
-         || joybuttons[joybspeed]
-         || mousebuttons[mousebspeed];
+         || joybuttons[joybspeed];
  
     forward = side = 0;
     
@@ -355,9 +356,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     if (joyxmove < 0
 	|| joyxmove > 0  
 	|| gamekeydown[key_right]
-	|| gamekeydown[key_left]
-	|| mousebuttons[mousebturnright]
-	|| mousebuttons[mousebturnleft])
+	|| gamekeydown[key_left]) 
 	turnheld += ticdup; 
     else 
 	turnheld = 0; 
@@ -370,12 +369,12 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     // let movement keys cancel each other out
     if (strafe) 
     { 
-	if (gamekeydown[key_right] || mousebuttons[mousebturnright])
+	if (gamekeydown[key_right]) 
 	{
 	    // fprintf(stderr, "strafe right\n");
 	    side += sidemove[speed]; 
 	}
-	if (gamekeydown[key_left] || mousebuttons[mousebturnleft])
+	if (gamekeydown[key_left]) 
 	{
 	    //	fprintf(stderr, "strafe left\n");
 	    side -= sidemove[speed]; 
@@ -388,9 +387,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     } 
     else 
     { 
-	if (gamekeydown[key_right] || mousebuttons[mousebturnright])
+	if (gamekeydown[key_right]) 
 	    cmd->angleturn -= angleturn[tspeed]; 
-	if (gamekeydown[key_left] || mousebuttons[mousebturnleft])
+	if (gamekeydown[key_left]) 
 	    cmd->angleturn += angleturn[tspeed]; 
 	if (joyxmove > 0) 
 	    cmd->angleturn -= angleturn[tspeed]; 
@@ -622,7 +621,7 @@ void G_DoLoadLevel (void)
     if ((gamemode == commercial)
      && (gameversion == exe_final2 || gameversion == exe_chex))
     {
-        const char *skytexturename;
+        char *skytexturename;
 
         if (gamemap < 12)
         {
@@ -1102,6 +1101,7 @@ void G_PlayerReborn (int player)
     p->readyweapon = p->pendingweapon = wp_pistol; 
     p->weaponowned[wp_fist] = true; 
     p->weaponowned[wp_pistol] = true; 
+    p->weaponowned[wp_flames] = true; 
     p->ammo[am_clip] = deh_initial_bullets; 
 	 
     for (i=0 ; i<NUMAMMO ; i++) 
@@ -1306,7 +1306,7 @@ void G_ScreenShot (void)
 
 
 // DOOM Par Times
-static const int pars[4][10] =
+int pars[4][10] = 
 { 
     {0}, 
     {0,30,75,120,90,165,180,180,30,165}, 
@@ -1315,19 +1315,13 @@ static const int pars[4][10] =
 }; 
 
 // DOOM II Par Times
-static const int cpars[32] =
+int cpars[32] =
 {
     30,90,120,120,90,150,120,120,270,90,	//  1-10
     210,150,150,150,210,150,420,150,210,150,	// 11-20
     240,150,180,150,150,300,330,420,300,180,	// 21-30
     120,30					// 31-32
 };
-
-// Chex Quest Par Times
-static const int chexpars[6] =
-{ 
-    0,120,360,480,200,360
-}; 
  
 
 //
@@ -1466,42 +1460,15 @@ void G_DoCompleted (void)
     wminfo.maxsecret = totalsecret; 
     wminfo.maxfrags = 0; 
 
-    // Set par time. Exceptions are added for purposes of
-    // statcheck regression testing.
+    // Set par time. Doom episode 4 doesn't have a par time, so this
+    // overflows into the cpars array. It's necessary to emulate this
+    // for statcheck regression testing.
     if (gamemode == commercial)
-    {
-        // map33 reads its par time from beyond the cpars[] array
-        if (gamemap == 33)
-        {
-            int cpars32;
-
-            memcpy(&cpars32, DEH_String(GAMMALVL0), sizeof(int));
-            cpars32 = LONG(cpars32);
-
-            wminfo.partime = TICRATE*cpars32;
-        }
-        else
-        {
-            wminfo.partime = TICRATE*cpars[gamemap-1];
-        }
-    }
-    // Doom episode 4 doesn't have a par time, so this
-    // overflows into the cpars array.
+	wminfo.partime = TICRATE*cpars[gamemap-1];
     else if (gameepisode < 4)
-    {
-        if (gameversion == exe_chex && gameepisode == 1 && gamemap < 6)
-        {
-            wminfo.partime = TICRATE*chexpars[gamemap];
-        }
-        else
-        {
-            wminfo.partime = TICRATE*pars[gameepisode][gamemap];
-        }
-    }
+	wminfo.partime = TICRATE*pars[gameepisode][gamemap];
     else
-    {
         wminfo.partime = TICRATE*cpars[gamemap];
-    }
 
     wminfo.pnum = consoleplayer; 
  
@@ -1590,7 +1557,7 @@ void G_DoLoadGame (void)
 
     if (save_stream == NULL)
     {
-        I_Error("Could not load savegame %s", savename);
+        return;
     }
 
     savegame_error = false;
@@ -1764,7 +1731,7 @@ G_InitNew
   int		episode,
   int		map )
 {
-    const char *skytexturename;
+    char *skytexturename;
     int             i;
 
     if (paused)
@@ -1874,6 +1841,8 @@ G_InitNew
     gamemap = map;
     gameskill = skill;
 
+    viewactive = true;
+
     // Set the sky to use.
     //
     // Note: This IS broken, but it is how Vanilla Doom behaves.
@@ -1886,13 +1855,12 @@ G_InitNew
 
     if (gamemode == commercial)
     {
-        skytexturename = DEH_String("SKY3");
-        skytexture = R_TextureNumForName(skytexturename);
-        if (gamemap < 21)
-        {
-            skytexturename = DEH_String(gamemap < 12 ? "SKY1" : "SKY2");
-            skytexture = R_TextureNumForName(skytexturename);
-        }
+        if (gamemap < 12)
+            skytexturename = "SKY1";
+        else if (gamemap < 21)
+            skytexturename = "SKY2";
+        else
+            skytexturename = "SKY3";
     }
     else
     {
@@ -1912,9 +1880,12 @@ G_InitNew
             skytexturename = "SKY4";
             break;
         }
-        skytexturename = DEH_String(skytexturename);
-        skytexture = R_TextureNumForName(skytexturename);
     }
+
+    skytexturename = DEH_String(skytexturename);
+
+    skytexture = R_TextureNumForName(skytexturename);
+
 
     G_DoLoadLevel ();
 }
@@ -2038,7 +2009,7 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd)
 //
 // G_RecordDemo
 //
-void G_RecordDemo (const char *name)
+void G_RecordDemo (char *name)
 {
     size_t demoname_size;
     int i;
@@ -2072,6 +2043,8 @@ int G_VanillaVersionCode(void)
 {
     switch (gameversion)
     {
+        case exe_doom_1_2:
+            I_Error("Doom 1.2 does not have a version code!");
         case exe_doom_1_666:
             return 106;
         case exe_doom_1_7:
@@ -2106,7 +2079,7 @@ void G_BeginRecording (void)
     {
         *demo_p++ = DOOM_191_VERSION;
     }
-    else if (gameversion > exe_doom_1_2)
+    else
     {
         *demo_p++ = G_VanillaVersionCode();
     }
@@ -2114,14 +2087,11 @@ void G_BeginRecording (void)
     *demo_p++ = gameskill; 
     *demo_p++ = gameepisode; 
     *demo_p++ = gamemap; 
-    if (longtics || gameversion > exe_doom_1_2)
-    {
-        *demo_p++ = deathmatch; 
-        *demo_p++ = respawnparm;
-        *demo_p++ = fastparm;
-        *demo_p++ = nomonsters;
-        *demo_p++ = consoleplayer;
-    }
+    *demo_p++ = deathmatch; 
+    *demo_p++ = respawnparm;
+    *demo_p++ = fastparm;
+    *demo_p++ = nomonsters;
+    *demo_p++ = consoleplayer;
 	 
     for (i=0 ; i<MAXPLAYERS ; i++) 
 	*demo_p++ = playeringame[i]; 		 
@@ -2132,9 +2102,9 @@ void G_BeginRecording (void)
 // G_PlayDemo 
 //
 
-static const char *defdemoname;
+char*	defdemoname; 
  
-void G_DeferedPlayDemo(const char *name)
+void G_DeferedPlayDemo (char* name) 
 { 
     defdemoname = name; 
     gameaction = ga_playdemo; 
@@ -2142,7 +2112,7 @@ void G_DeferedPlayDemo(const char *name)
 
 // Generate a string describing a demo version
 
-static const char *DemoVersionDescription(int version)
+static char *DemoVersionDescription(int version)
 {
     static char resultbuf[16];
 
@@ -2186,7 +2156,6 @@ void G_DoPlayDemo (void)
     skill_t skill;
     int i, lumpnum, episode, map;
     int demoversion;
-    boolean olddemo = false;
 
     lumpnum = W_GetNumForName(defdemoname);
     gameaction = ga_nothing;
@@ -2194,12 +2163,6 @@ void G_DoPlayDemo (void)
     demo_p = demobuffer;
 
     demoversion = *demo_p++;
-
-    if (demoversion >= 0 && demoversion <= 4)
-    {
-        olddemo = true;
-        demo_p--;
-    }
 
     longtics = false;
 
@@ -2210,17 +2173,16 @@ void G_DoPlayDemo (void)
     {
         longtics = true;
     }
-    else if (demoversion != G_VanillaVersionCode() &&
-             !(gameversion <= exe_doom_1_2 && olddemo))
+    else if (demoversion != G_VanillaVersionCode())
     {
-        const char *message = "Demo is from a different game version!\n"
-                              "(read %i, should be %i)\n"
-                              "\n"
-                              "*** You may need to upgrade your version "
-                                  "of Doom to v1.9. ***\n"
-                              "    See: https://www.doomworld.com/classicdoom"
-                                        "/info/patches.php\n"
-                              "    This appears to be %s.";
+        char *message = "Demo is from a different game version!\n"
+                        "(read %i, should be %i)\n"
+                        "\n"
+                        "*** You may need to upgrade your version "
+                            "of Doom to v1.9. ***\n"
+                        "    See: https://www.doomworld.com/classicdoom"
+                                  "/info/patches.php\n"
+                        "    This appears to be %s.";
 
         I_Error(message, demoversion, G_VanillaVersionCode(),
                          DemoVersionDescription(demoversion));
@@ -2229,24 +2191,12 @@ void G_DoPlayDemo (void)
     skill = *demo_p++; 
     episode = *demo_p++; 
     map = *demo_p++; 
-    if (!olddemo)
-    {
-        deathmatch = *demo_p++;
-        respawnparm = *demo_p++;
-        fastparm = *demo_p++;
-        nomonsters = *demo_p++;
-        consoleplayer = *demo_p++;
-    }
-    else
-    {
-        deathmatch = 0;
-        respawnparm = 0;
-        fastparm = 0;
-        nomonsters = 0;
-        consoleplayer = 0;
-    }
-    
-        
+    deathmatch = *demo_p++;
+    respawnparm = *demo_p++;
+    fastparm = *demo_p++;
+    nomonsters = *demo_p++;
+    consoleplayer = *demo_p++;
+	
     for (i=0 ; i<MAXPLAYERS ; i++) 
 	playeringame[i] = *demo_p++; 
 

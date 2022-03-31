@@ -885,7 +885,7 @@ void DrawMainBar(void)
 
 void DrawInventoryBar(void)
 {
-    const char *patch;
+    char *patch;
     int i;
     int x;
 
@@ -919,7 +919,7 @@ void DrawInventoryBar(void)
 
 void DrawFullScreenStuff(void)
 {
-    const char *patch;
+    char *patch;
     int i;
     int x;
     int temp;

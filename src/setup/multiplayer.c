@@ -33,8 +33,6 @@
 #include "net_io.h"
 #include "net_query.h"
 
-#include "net_petname.h"
-
 #define MULTI_START_HELP_URL "https://www.chocolate-doom.org/setup-multi-start"
 #define MULTI_JOIN_HELP_URL "https://www.chocolate-doom.org/setup-multi-join"
 #define MULTI_CONFIG_HELP_URL "https://www.chocolate-doom.org/setup-multi-config"
@@ -61,7 +59,7 @@ static const iwad_t fallback_iwads[] = {
 // Array of IWADs found to be installed
 
 static const iwad_t **found_iwads;
-static const char **iwad_labels;
+static char **iwad_labels;
 
 // Index of the currently selected IWAD
 
@@ -69,53 +67,53 @@ static int found_iwad_selected = -1;
 
 // Filename to pass to '-iwad'.
 
-static const char *iwadfile;
+static char *iwadfile;
 
-static const char *wad_extensions[] = { "wad", "lmp", "deh", NULL };
+static char *wad_extensions[] = { "wad", "lmp", "deh", NULL };
 
-static const char *doom_skills[] =
+static char *doom_skills[] =
 {
     "I'm too young to die.", "Hey, not too rough.", "Hurt me plenty.",
     "Ultra-Violence.", "NIGHTMARE!",
 };
 
-static const char *chex_skills[] =
+static char *chex_skills[] =
 {
     "Easy does it", "Not so sticky", "Gobs of goo", "Extreme ooze",
     "SUPER SLIMEY!"
 };
 
-static const char *heretic_skills[] =
+static char *heretic_skills[] =
 {
     "Thou needeth a wet-nurse", "Yellowbellies-R-us", "Bringest them oneth",
     "Thou art a smite-meister", "Black plague possesses thee"
 };
 
-static const char *hexen_fighter_skills[] =
+static char *hexen_fighter_skills[] =
 {
     "Squire", "Knight", "Warrior", "Berserker", "Titan"
 };
 
-static const char *hexen_cleric_skills[] =
+static char *hexen_cleric_skills[] =
 {
     "Altar boy", "Acolyte", "Priest", "Cardinal", "Pope"
 };
 
-static const char *hexen_mage_skills[] =
+static char *hexen_mage_skills[] =
 {
     "Apprentice", "Enchanter", "Sorceror", "Warlock", "Archimage"
 };
 
-static const char *strife_skills[] =
+static char *strife_skills[] =
 {
     "Training", "Rookie", "Veteran", "Elite", "Bloodbath"
 };
 
-static const char *character_classes[] = { "Fighter", "Cleric", "Mage" };
+static char *character_classes[] = { "Fighter", "Cleric", "Mage" };
 
-static const char *gamemodes[] = { "Co-operative", "Deathmatch", "Deathmatch 2.0" };
+static char *gamemodes[] = { "Co-operative", "Deathmatch", "Deathmatch 2.0" };
 
-static const char *strife_gamemodes[] =
+static char *strife_gamemodes[] =
 {
     "Normal deathmatch",
     "Items respawn", // (altdeath)
@@ -175,8 +173,7 @@ static void AddWADs(execute_context_t *exec)
         {
             if (!have_wads)
             {
-                AddCmdLineParameter(exec, "-merge");
-                have_wads = 1;
+                AddCmdLineParameter(exec, "-file");
             }
 
             AddCmdLineParameter(exec, "\"%s\"", wads[i]);
@@ -192,7 +189,7 @@ static void AddExtraParameters(execute_context_t *exec)
     {
         if (extra_params[i] != NULL && strlen(extra_params[i]) > 0)
         {
-            AddCmdLineParameter(exec, "%s", extra_params[i]);
+            AddCmdLineParameter(exec, extra_params[i]);
         }
     }
 }
@@ -395,8 +392,8 @@ static void LevelSelectDialog(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(user_data))
     const iwad_t *iwad;
     char buf[10];
     int episodes;
-    int x, y;
-    int l;
+    intptr_t x, y;
+    intptr_t l;
     int i;
 
     window = TXT_NewWindow("Select level");
@@ -424,11 +421,10 @@ static void LevelSelectDialog(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(user_data))
                     continue;
                 }
 
-                M_snprintf(buf, sizeof(buf),
-                           " E%dM%d ", x, y);
+                M_snprintf(buf, sizeof(buf), " E%iM%i ", x, y);
                 button = TXT_NewButton(buf);
                 TXT_SignalConnect(button, "pressed",
-                                  SetExMyWarp, (void *) (intptr_t) (x * 10 + y));
+                                  SetExMyWarp, (void *) (x * 10 + y));
                 TXT_SignalConnect(button, "pressed",
                                   CloseLevelSelectDialog, window);
                 TXT_AddWidget(window, button);
@@ -457,10 +453,10 @@ static void LevelSelectDialog(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(user_data))
                 continue;
             }
 
-            M_snprintf(buf, sizeof(buf), " MAP%02d ", l);
+            M_snprintf(buf, sizeof(buf), " MAP%02i ", l);
             button = TXT_NewButton(buf);
             TXT_SignalConnect(button, "pressed", 
-                              SetMAPxyWarp, (void *) (intptr_t) l);
+                              SetMAPxyWarp, (void *) l);
             TXT_SignalConnect(button, "pressed",
                               CloseLevelSelectDialog, window);
             TXT_AddWidget(window, button);
@@ -708,7 +704,7 @@ static txt_dropdown_list_t *GameTypeDropdown(void)
 // and the single player warp menu.  The parameters specify
 // the window title and whether to display multiplayer options.
 
-static void StartGameMenu(const char *window_title, int multiplayer)
+static void StartGameMenu(char *window_title, int multiplayer)
 {
     txt_window_t *window;
     txt_widget_t *iwad_selector;
@@ -801,12 +797,12 @@ static void StartGameMenu(const char *window_title, int multiplayer)
     UpdateWarpButton();
 }
 
-void StartMultiGame(TXT_UNCAST_ARG(widget), void *user_data)
+void StartMultiGame(void)
 {
     StartGameMenu("Start multiplayer game", 1);
 }
 
-void WarpMenu(TXT_UNCAST_ARG(widget), void *user_data)
+void WarpMenu(void)
 {
     StartGameMenu("Level Warp", 0);
 }
@@ -987,7 +983,7 @@ static void QueryWindowClosed(TXT_UNCAST_ARG(window), void *unused)
     TXT_SetPeriodicCallback(NULL, NULL, 0);
 }
 
-static void ServerQueryWindow(const char *title)
+static void ServerQueryWindow(char *title)
 {
     txt_table_t *results_table;
 
@@ -1019,7 +1015,7 @@ static void FindLANServer(TXT_UNCAST_ARG(widget),
     ServerQueryWindow("Find LAN server");
 }
 
-void JoinMultiGame(TXT_UNCAST_ARG(widget), void *user_data)
+void JoinMultiGame(void)
 {
     txt_window_t *window;
     txt_inputbox_t *address_box;
@@ -1070,7 +1066,7 @@ void JoinMultiGame(TXT_UNCAST_ARG(widget), void *user_data)
 void SetChatMacroDefaults(void)
 {
     int i;
-    const char *const defaults[] =
+    char *defaults[] = 
     {
         HUSTR_CHATMACRO0,
         HUSTR_CHATMACRO1,
@@ -1099,11 +1095,32 @@ void SetPlayerNameDefault(void)
 {
     if (net_player_name == NULL)
     {
-        net_player_name = NET_GetRandomPetName();
+        net_player_name = getenv("USER");
     }
+
+    if (net_player_name == NULL)
+    {
+        net_player_name = getenv("USERNAME");
+    }
+
+    if (net_player_name == NULL)
+    {
+        net_player_name = "player";
+    }
+
+    // Now strdup() the string so that it's in a mutable form
+    // that can be freed when the value changes.
+
+#ifdef _WIN32
+    // On Windows, environment variables are in OEM codepage
+    // encoding, so convert to UTF8:
+    net_player_name = M_OEMToUTF8(net_player_name);
+#else
+    net_player_name = M_StringDuplicate(net_player_name);
+#endif
 }
 
-void MultiplayerConfig(TXT_UNCAST_ARG(widget), void *user_data)
+void MultiplayerConfig(void)
 {
     txt_window_t *window;
     txt_label_t *label;

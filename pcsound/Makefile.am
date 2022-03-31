@@ -1,8 +1,6 @@
 
 AM_CFLAGS=@SDLMIXER_CFLAGS@
 
-EXTRA_DIST=CMakeLists.txt
-
 noinst_LIBRARIES=libpcsound.a
 
 libpcsound_a_SOURCES =                            \

@@ -127,7 +127,6 @@ static net_addr_t *NET_SDL_FindAddress(IPaddress *addr)
     new_entry = Z_Malloc(sizeof(addrpair_t), PU_STATIC, 0);
 
     new_entry->sdl_addr = *addr;
-    new_entry->net_addr.refcount = 0;
     new_entry->net_addr.handle = &new_entry->sdl_addr;
     new_entry->net_addr.module = &net_sdl_module;
 
@@ -326,7 +325,7 @@ void NET_SDL_AddrToString(net_addr_t *addr, char *buffer, int buffer_len)
     }
 }
 
-net_addr_t *NET_SDL_ResolveAddress(const char *address)
+net_addr_t *NET_SDL_ResolveAddress(char *address)
 {
     IPaddress ip;
     char *addr_hostname;
@@ -336,21 +335,25 @@ net_addr_t *NET_SDL_ResolveAddress(const char *address)
 
     colon = strchr(address, ':');
 
-    addr_hostname = M_StringDuplicate(address);
     if (colon != NULL)
     {
+	addr_hostname = M_StringDuplicate(address);
 	addr_hostname[colon - address] = '\0';
 	addr_port = atoi(colon + 1);
     }
     else
     {
+	addr_hostname = address;
 	addr_port = port;
     }
     
     result = SDLNet_ResolveHost(&ip, addr_hostname, addr_port);
 
-    free(addr_hostname);
-
+    if (addr_hostname != address)
+    {
+	free(addr_hostname);
+    }
+    
     if (result)
     {
         // unable to resolve

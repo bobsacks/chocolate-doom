@@ -29,10 +29,10 @@
 
 #include "p_mobj.h"
 
-const char *sprnames[] = {
+char *sprnames[] = {
     "TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
-    "MISF","SAWG","PLSG","PLSF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
-    "PLSS","PLSE","MISL","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
+    "MISF","SAWG","PLSG","PLSF","FLMG","FLMF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
+    "PLSS","PLSE","FLMS","FLME","MISL","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
     "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
     "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
     "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","FCAN",
@@ -68,10 +68,12 @@ void A_GunFlash();
 void A_FireMissile();
 void A_Saw();
 void A_FirePlasma();
+void A_FireFlames();
 void A_BFGsound();
 void A_FireBFG();
 void A_BFGSpray();
 void A_Explode();
+void B_Explode();
 void A_Pain();
 void A_PlayerScream();
 void A_Fall();
@@ -206,6 +208,16 @@ state_t	states[NUMSTATES] = {
     {SPR_PLSG,1,20,{A_ReFire},S_PLASMA,0,0},	// S_PLASMA2
     {SPR_PLSF,32768,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH1
     {SPR_PLSF,32769,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH2
+    {SPR_FLMG,0,1,{A_WeaponReady},S_FLAMES,0,0},	// S_FLAMES
+    {SPR_FLMG,0,1,{A_Lower},S_FLAMESDOWN,0,0},	// S_PLASMADOWN
+    {SPR_FLMG,0,1,{A_Raise},S_FLAMESUP,0,0},	// S_FLAMESUP
+    {SPR_FLMG,0,3,{A_FireFlames},S_FLAMES2,0,0},	// S_FLAMES1
+    //{SPR_FLMG,1,20,{A_ReFire},S_FLAMES,0,0},	// S_FLAMES2
+    {SPR_FLMG,1,7,{A_ReFire},S_FLAMES3,0,0},	// S_FLAMES2
+    {SPR_FLMG,2,7,{NULL},S_FLAMES4,0,0},	// S_FLAMES2
+    {SPR_FLMG,3,7,{NULL},S_FLAMES,0,0},	// S_FLAMES2
+    {SPR_FLMF,32768,4,{A_Light1},S_LIGHTDONE,0,0},	// S_FLAMESFLASH1
+    {SPR_FLMF,32769,4,{A_Light1},S_LIGHTDONE,0,0},	// S_FLAMESFLASH2
     {SPR_BFGG,0,1,{A_WeaponReady},S_BFG,0,0},	// S_BFG
     {SPR_BFGG,0,1,{A_Lower},S_BFGDOWN,0,0},	// S_BFGDOWN
     {SPR_BFGG,0,1,{A_Raise},S_BFGUP,0,0},	// S_BFGUP
@@ -239,6 +251,15 @@ state_t	states[NUMSTATES] = {
     {SPR_PLSE,32770,4,{NULL},S_PLASEXP4,0,0},	// S_PLASEXP3
     {SPR_PLSE,32771,4,{NULL},S_PLASEXP5,0,0},	// S_PLASEXP4
     {SPR_PLSE,32772,4,{NULL},S_NULL,0,0},	// S_PLASEXP5
+    {SPR_FLMS,32768,6,{NULL},S_FLAMBALL2,0,0},	// S_FLAMBALL
+    {SPR_FLMS,32769,6,{NULL},S_FLAMBALL,0,0},	// S_FLAMBALL2
+    {SPR_FLME,32768,4,{NULL},S_FLAMEXP2,0,0},	// S_FLAMEXP
+    {SPR_FLME,32769,4,{NULL},S_FLAMEXP3,0,0},	// S_FLAMEXP2
+    {SPR_FLME,32770,4,{NULL},S_FLAMEXP4,0,0},	// S_FLAMEXP3
+    //{SPR_FLME,32771,4,{NULL},S_FLAMEXP5,0,0},	// S_FLAMEXP4
+    //A_StartFire
+    {SPR_FLME,32771,4,{NULL},S_FLAMEXP5,0,0},	// S_FLAMEXP4
+    {SPR_FLME,32772,4,{NULL},S_FIRE2,0,0},	// S_PFLAMEXP5
     {SPR_MISL,32768,1,{NULL},S_ROCKET,0,0},	// S_ROCKET
     {SPR_BFS1,32768,4,{NULL},S_BFGSHOT2,0,0},	// S_BFGSHOT
     {SPR_BFS1,32769,4,{NULL},S_BFGSHOT,0,0},	// S_BFGSHOT2
@@ -1995,6 +2016,32 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL,		// meleestate
 	S_NULL,		// missilestate
 	S_PLASEXP,		// deathstate
+	S_NULL,		// xdeathstate
+	sfx_firxpl,		// deathsound
+	25*FRACUNIT,		// speed
+	13*FRACUNIT,		// radius
+	8*FRACUNIT,		// height
+	100,		// mass
+	5,		// damage
+	sfx_None,		// activesound
+	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
+	S_NULL		// raisestate
+    },
+
+    {		// MT_FLAMES
+	-1,		// doomednum
+	S_FLAMBALL,		// spawnstate
+	1000,		// spawnhealth
+	S_NULL,		// seestate
+	sfx_plasma,		// seesound
+	8,		// reactiontime
+	sfx_None,		// attacksound
+	S_NULL,		// painstate
+	0,		// painchance
+	sfx_None,		// painsound
+	S_NULL,		// meleestate
+	S_NULL,		// missilestate
+	S_FLAMEXP,		// deathstate
 	S_NULL,		// xdeathstate
 	sfx_firxpl,		// deathsound
 	25*FRACUNIT,		// speed

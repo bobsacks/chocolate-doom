@@ -35,7 +35,6 @@ typedef enum
     heretic,         // Heretic
     hexen,           // Hexen
     strife,          // Strife
-    doom2f,          // Doom 2: L'Enfer sur Terre
 
     none
 } GameMission_t;
@@ -103,8 +102,7 @@ boolean D_ValidEpisodeMap(GameMission_t mission, GameMode_t mode,
                           int episode, int map);
 int D_GetNumEpisodes(GameMission_t mission, GameMode_t mode);
 boolean D_IsEpisodeMap(GameMission_t mission);
-const char *D_GameMissionString(GameMission_t mission);
-const char *D_GameModeString(GameMode_t mode);
+char *D_GameMissionString(GameMission_t mission);
 
 #endif /* #ifndef __D_MODE__ */
 

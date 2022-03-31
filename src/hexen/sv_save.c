@@ -128,7 +128,7 @@ static byte SV_ReadByte(void);
 static uint16_t SV_ReadWord(void);
 static uint32_t SV_ReadLong(void);
 static void *SV_ReadPtr(void);
-static void SV_Write(const void *buffer, int size);
+static void SV_Write(void *buffer, int size);
 static void SV_WriteByte(byte val);
 static void SV_WriteWord(unsigned short val);
 static void SV_WriteLong(unsigned int val);
@@ -1593,7 +1593,8 @@ static void StreamIn_acs_t(acs_t *str)
     }
 
     // int *ip;
-    str->ip = SV_ReadLong();
+    i = SV_ReadLong();
+    str->ip = (int *) (ActionCodeBase + i);
 }
 
 static void StreamOut_acs_t(acs_t *str)
@@ -1644,7 +1645,7 @@ static void StreamOut_acs_t(acs_t *str)
     }
 
     // int *ip;
-    SV_WriteLong(str->ip);
+    SV_WriteLong((byte *) str->ip - ActionCodeBase);
 }
 
 
@@ -1922,7 +1923,7 @@ static void StreamOut_floorWaggle_t(floorWaggle_t *str)
 //
 //==========================================================================
 
-void SV_SaveGame(int slot, const char *description)
+void SV_SaveGame(int slot, char *description)
 {
     char fileName[100];
     char versionText[HXS_VERSION_TEXT_LENGTH];
@@ -3238,10 +3239,6 @@ static void CopySaveSlot(int sourceSlot, int destSlot)
                    "%shex%d.hxs", SavePath, destSlot);
         CopyFile(sourceName, destName);
     }
-    else
-    {
-        I_Error("Could not load savegame %s", sourceName);
-    }
 }
 
 //==========================================================================
@@ -3347,12 +3344,6 @@ static boolean ExistingFile(char *name)
 static void SV_OpenRead(char *fileName)
 {
     SavingFP = fopen(fileName, "rb");
-
-    // Should never happen, only if hex6.hxs cannot ever be created.
-    if (SavingFP == NULL)
-    {
-        I_Error("Could not load savegame %s", fileName);
-    }
 }
 
 static void SV_OpenWrite(char *fileName)
@@ -3382,12 +3373,7 @@ static void SV_Close(void)
 
 static void SV_Read(void *buffer, int size)
 {
-    int retval = fread(buffer, 1, size, SavingFP);
-    if (retval != size)
-    {
-        I_Error("Incomplete read in SV_Read: Expected %d, got %d bytes",
-            size, retval);
-    }
+    fread(buffer, size, 1, SavingFP);
 }
 
 static byte SV_ReadByte(void)
@@ -3422,7 +3408,7 @@ static void *SV_ReadPtr(void)
 //
 //==========================================================================
 
-static void SV_Write(const void *buffer, int size)
+static void SV_Write(void *buffer, int size)
 {
     fwrite(buffer, size, 1, SavingFP);
 }
@@ -3452,6 +3438,6 @@ static void SV_WritePtr(void *val)
     // nowadays they might be larger. Whatever value we write here isn't
     // going to be much use when we reload the game.
 
-    ptr = (long)(intptr_t) val;
+    ptr = (long) val;
     SV_WriteLong((unsigned int) (ptr & 0xffffffff));
 }

@@ -366,10 +366,10 @@ void F_Drawer(void)
 
 static char *GetFinaleText(int sequence)
 {
-    const char *msgLumpName;
+    char *msgLumpName;
     int msgSize;
     int msgLump;
-    static const char *winMsgLumpNames[] = {
+    static char *winMsgLumpNames[] = {
         "win1msg",
         "win2msg",
         "win3msg"

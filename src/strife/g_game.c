@@ -388,8 +388,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     speed = key_speed >= NUMKEYS
          || joybspeed >= MAX_JOY_BUTTONS
          || gamekeydown[key_speed] 
-         || joybuttons[joybspeed]
-         || mousebuttons[mousebspeed];
+         || joybuttons[joybspeed];
  
     forward = side = 0;
 
@@ -406,9 +405,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     if (joyxmove < 0
         || joyxmove > 0  
         || gamekeydown[key_right]
-        || gamekeydown[key_left]
-        || mousebuttons[mousebturnright]
-        || mousebuttons[mousebturnleft])
+        || gamekeydown[key_left]) 
         turnheld += ticdup; 
     else 
         turnheld = 0; 
@@ -421,12 +418,12 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     // let movement keys cancel each other out
     if (strafe) 
     { 
-        if (gamekeydown[key_right] || mousebuttons[mousebturnright])
+        if (gamekeydown[key_right]) 
         {
             // fprintf(stderr, "strafe right\n");
             side += sidemove[speed]; 
         }
-        if (gamekeydown[key_left] || mousebuttons[mousebturnleft])
+        if (gamekeydown[key_left]) 
         {
             //	fprintf(stderr, "strafe left\n");
             side -= sidemove[speed]; 
@@ -439,9 +436,9 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     } 
     else 
     { 
-        if (gamekeydown[key_right] || mousebuttons[mousebturnright])
+        if (gamekeydown[key_right]) 
             cmd->angleturn -= angleturn[tspeed]; 
-        if (gamekeydown[key_left] || mousebuttons[mousebturnleft])
+        if (gamekeydown[key_left]) 
             cmd->angleturn += angleturn[tspeed]; 
         if (joyxmove > 0) 
             cmd->angleturn -= angleturn[tspeed]; 
@@ -1937,7 +1934,7 @@ G_InitNew
 ( skill_t       skill,
   int           map ) 
 { 
-    const char *skytexturename;
+    char *skytexturename;
     int             i; 
 
     if (paused) 
@@ -2190,7 +2187,7 @@ void G_WriteDemoTiccmd (ticcmd_t* cmd)
 // 
 // [STRIFE] Verified unmodified
 //
-void G_RecordDemo (const char* name)
+void G_RecordDemo (char* name)
 {
     size_t demoname_size;
     int             i;
@@ -2262,14 +2259,14 @@ void G_BeginRecording (void)
 // G_PlayDemo 
 //
 
-const char	*defdemoname;
+char*	defdemoname; 
  
 //
 // G_DeferedPlayDemo
 //
 // [STRIFE] Verified unmodified
 //
-void G_DeferedPlayDemo(const char *name)
+void G_DeferedPlayDemo (char* name) 
 { 
     defdemoname = name; 
     gameaction = ga_playdemo; 
@@ -2277,7 +2274,7 @@ void G_DeferedPlayDemo(const char *name)
 
 // Generate a string describing a demo version
 // [STRIFE] Modified to handle the one and only Strife demo version.
-static const char *DemoVersionDescription(int version)
+static char *DemoVersionDescription(int version)
 {
     static char resultbuf[16];
  
@@ -2329,14 +2326,14 @@ void G_DoPlayDemo (void)
     */
     else
     {
-        const char *message = "Demo is from a different game version!\n"
-                              "(read %i, should be %i)\n"
-                              "\n"
-                              "*** You may need to upgrade your version "
-                                  "of Strife to v1.1 or later. ***\n"
-                              "    See: https://www.doomworld.com/classicdoom"
-                                        "/info/patches.php\n"
-                              "    This appears to be %s.";
+        char *message = "Demo is from a different game version!\n"
+                        "(read %i, should be %i)\n"
+                        "\n"
+                        "*** You may need to upgrade your version "
+                            "of Strife to v1.1 or later. ***\n"
+                        "    See: https://www.doomworld.com/classicdoom"
+                                  "/info/patches.php\n"
+                        "    This appears to be %s.";
 
         I_Error(message, demoversion, STRIFE_VERSION,
                          DemoVersionDescription(demoversion));

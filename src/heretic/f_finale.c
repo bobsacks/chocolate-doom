@@ -24,16 +24,16 @@
 #include "s_sound.h"
 #include "v_video.h"
 
-static int finalestage;                // 0 = text, 1 = art screen
-static int finalecount;
+int finalestage;                // 0 = text, 1 = art screen
+int finalecount;
 
 #define TEXTSPEED       3
 #define TEXTWAIT        250
 
-static const char *finaletext;
-static const char *finaleflat;
+char *finaletext;
+char *finaleflat;
 
-static int FontABaseLump;
+int FontABaseLump;
 
 extern boolean automapactive;
 extern boolean viewactive;
@@ -156,7 +156,7 @@ void F_TextWrite(void)
     byte *src, *dest;
     int x, y;
     int count;
-    const char *ch;
+    char *ch;
     int c;
     int cx, cy;
     patch_t *w;
@@ -298,7 +298,7 @@ void F_DrawUnderwater(void)
 {
     static boolean underwawa = false;
     extern boolean askforquit;
-    const char *lumpname;
+    char *lumpname;
     byte *palette;
 
     // The underwater screen has its own palette, which is rather annoying.

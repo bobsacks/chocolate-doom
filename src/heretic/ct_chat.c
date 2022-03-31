@@ -68,7 +68,7 @@ boolean cheated;
 
 static int FontABaseLump;
 
-const char *CT_FromPlrText[MAXPLAYERS] = {
+char *CT_FromPlrText[MAXPLAYERS] = {
     "GREEN:  ",
     "YELLOW:  ",
     "RED:  ",

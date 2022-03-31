@@ -40,6 +40,8 @@ typedef enum
     SPR_SAWG,
     SPR_PLSG,
     SPR_PLSF,
+    SPR_FLMG,
+    SPR_FLMF,
     SPR_BFGG,
     SPR_BFGF,
     SPR_BLUD,
@@ -48,6 +50,8 @@ typedef enum
     SPR_BAL2,
     SPR_PLSS,
     SPR_PLSE,
+    SPR_FLMS,
+    SPR_FLME,
     SPR_MISL,
     SPR_BFS1,
     SPR_BFE1,
@@ -251,6 +255,15 @@ typedef enum
     S_PLASMA2,
     S_PLASMAFLASH1,
     S_PLASMAFLASH2,
+    S_FLAMES,
+    S_FLAMESDOWN,
+    S_FLAMESUP,
+    S_FLAMES1,
+    S_FLAMES2,
+    S_FLAMES3,
+    S_FLAMES4,
+    S_FLAMESFLASH1,
+    S_FLAMESFLASH2,
     S_BFG,
     S_BFGDOWN,
     S_BFGUP,
@@ -284,6 +297,13 @@ typedef enum
     S_PLASEXP3,
     S_PLASEXP4,
     S_PLASEXP5,
+    S_FLAMBALL,
+    S_FLAMBALL2,
+    S_FLAMEXP,
+    S_FLAMEXP2,
+    S_FLAMEXP3,
+    S_FLAMEXP4,
+    S_FLAMEXP5,
     S_ROCKET,
     S_BFGSHOT,
     S_BFGSHOT2,
@@ -1154,7 +1174,7 @@ typedef struct
 } state_t;
 
 extern state_t	states[NUMSTATES];
-extern const char *sprnames[];
+extern char *sprnames[];
 
 typedef enum {
     MT_PLAYER,
@@ -1192,6 +1212,7 @@ typedef enum {
     MT_HEADSHOT,
     MT_ROCKET,
     MT_PLASMA,
+    MT_FLAMES,
     MT_BFG,
     MT_ARACHPLAZ,
     MT_PUFF,

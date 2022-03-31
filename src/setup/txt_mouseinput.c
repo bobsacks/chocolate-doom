@@ -26,8 +26,7 @@
 #include "txt_utf8.h"
 #include "txt_window.h"
 
-// eg. "BUTTON #10"
-#define MOUSE_INPUT_WIDTH 10
+#define MOUSE_INPUT_WIDTH 8
 
 static int MousePressCallback(txt_window_t *window, 
                               int x, int y, int b,

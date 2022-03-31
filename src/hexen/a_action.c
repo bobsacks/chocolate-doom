@@ -153,9 +153,12 @@ void A_PotteryExplode(mobj_t * actor)
     {
         mo = P_SpawnMobj(actor->x, actor->y, actor->z, MT_POTTERYBIT1);
         P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 5));
-        mo->momz = ((P_Random() & 7) + 5) * (3 * FRACUNIT / 4);
-        mo->momx = P_SubRandom() << (FRACBITS - 6);
-        mo->momy = P_SubRandom() << (FRACBITS - 6);
+        if (mo)
+        {
+            mo->momz = ((P_Random() & 7) + 5) * (3 * FRACUNIT / 4);
+            mo->momx = P_SubRandom() << (FRACBITS - 6);
+            mo->momy = P_SubRandom() << (FRACBITS - 6);
+        }
     }
     S_StartSound(mo, SFX_POTTERY_EXPLODE);
     if (actor->args[0])
@@ -197,9 +200,10 @@ void A_PotteryCheck(mobj_t * actor)
     if (!netgame)
     {
         pmo = players[consoleplayer].mo;
-        if (P_CheckSight(actor, pmo)
-	  && (abs((int)R_PointToAngle2(pmo->x, pmo->y, actor->x, actor->y)
-           - (int)pmo->angle) <= ANG45))
+        if (P_CheckSight(actor, pmo) && (abs(R_PointToAngle2(pmo->x,
+                                                             pmo->y, actor->x,
+                                                             actor->y) -
+                                             pmo->angle) <= ANG45))
         {                       // Previous state (pottery bit waiting state)
             P_SetMobjState(actor, actor->state - &states[0] - 1);
         }
@@ -217,9 +221,11 @@ void A_PotteryCheck(mobj_t * actor)
                 continue;
             }
             pmo = players[i].mo;
-            if (P_CheckSight(actor, pmo) 
-              && (abs((int)R_PointToAngle2(pmo->x, pmo->y, actor->x, actor->y)
-               - (int)pmo->angle) <= ANG45))
+            if (P_CheckSight(actor, pmo) && (abs(R_PointToAngle2(pmo->x,
+                                                                 pmo->y,
+                                                                 actor->x,
+                                                                 actor->y) -
+                                                 pmo->angle) <= ANG45))
             {                   // Previous state (pottery bit waiting state)
                 P_SetMobjState(actor, actor->state - &states[0] - 1);
                 return;
@@ -259,9 +265,12 @@ void A_CorpseExplode(mobj_t * actor)
     {
         mo = P_SpawnMobj(actor->x, actor->y, actor->z, MT_CORPSEBIT);
         P_SetMobjState(mo, mo->info->spawnstate + (P_Random() % 3));
-        mo->momz = ((P_Random() & 7) + 5) * (3 * FRACUNIT / 4);
-        mo->momx = P_SubRandom() << (FRACBITS - 6);
-        mo->momy = P_SubRandom() << (FRACBITS - 6);
+        if (mo)
+        {
+            mo->momz = ((P_Random() & 7) + 5) * (3 * FRACUNIT / 4);
+            mo->momx = P_SubRandom() << (FRACBITS - 6);
+            mo->momy = P_SubRandom() << (FRACBITS - 6);
+        }
     }
     // Spawn a skull
     mo = P_SpawnMobj(actor->x, actor->y, actor->z, MT_CORPSEBIT);
@@ -1171,17 +1180,18 @@ void A_SoAExplode(mobj_t * actor)
                          actor->z + (r1 * actor->height / 256),
                          MT_ZARMORCHUNK);
         P_SetMobjState(mo, mo->info->spawnstate + i);
-        mo->momz = ((P_Random() & 7) + 5) * FRACUNIT;
-        mo->momx = P_SubRandom() << (FRACBITS - 6);
-        mo->momy = P_SubRandom() << (FRACBITS - 6);
+        if (mo)
+        {
+            mo->momz = ((P_Random() & 7) + 5) * FRACUNIT;
+            mo->momx = P_SubRandom() << (FRACBITS - 6);
+            mo->momy = P_SubRandom() << (FRACBITS - 6);
+        }
     }
     if (actor->args[0])
     {                           // Spawn an item
-#if 0 // Checks are not present in version 1.1
         if (!nomonsters
             || !(mobjinfo[TranslateThingType[actor->args[0]]].
                  flags & MF_COUNTKILL))
-#endif
         {                       // Only spawn monsters if not -nomonsters
             P_SpawnMobj(actor->x, actor->y, actor->z,
                         TranslateThingType[actor->args[0]]);

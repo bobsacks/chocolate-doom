@@ -1,8 +1,6 @@
 
 AM_CFLAGS=@SDLMIXER_CFLAGS@
 
-EXTRA_DIST=CMakeLists.txt
-
 SUBDIRS = . examples
 
 noinst_LIBRARIES=libopl.a

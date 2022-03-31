@@ -34,7 +34,7 @@ int ArmorIncrement[NUMCLASSES][NUMARMOR] = {
 int AutoArmorSave[NUMCLASSES] =
     { 15 * FRACUNIT, 10 * FRACUNIT, 5 * FRACUNIT, 0 };
 
-const char *TextKeyMessages[] = {
+char *TextKeyMessages[] = {
     TXT_KEY_STEEL,
     TXT_KEY_CAVE,
     TXT_KEY_AXE,
@@ -53,7 +53,7 @@ static void TryPickupArtifact(player_t * player, artitype_t artifactType,
                               mobj_t * artifact);
 static void TryPickupWeapon(player_t * player, pclass_t weaponClass,
                             weapontype_t weaponType, mobj_t * weapon,
-                            const char *message);
+                            char *message);
 static void TryPickupWeaponPiece(player_t * player, pclass_t matchClass,
                                  int pieceValue, mobj_t * pieceMobj);
 
@@ -63,7 +63,7 @@ static void TryPickupWeaponPiece(player_t * player, pclass_t matchClass,
 //
 //--------------------------------------------------------------------------
 
-void P_SetMessage(player_t * player, const char *message, boolean ultmsg)
+void P_SetMessage(player_t * player, char *message, boolean ultmsg)
 {
     if ((player->ultimateMessage || !messageson) && !ultmsg)
     {
@@ -90,7 +90,7 @@ void P_SetMessage(player_t * player, const char *message, boolean ultmsg)
 //
 //==========================================================================
 
-void P_SetYellowMessage(player_t * player, const char *message, boolean ultmsg)
+void P_SetYellowMessage(player_t * player, char *message, boolean ultmsg)
 {
     if ((player->ultimateMessage || !messageson) && !ultmsg)
     {
@@ -190,7 +190,7 @@ boolean P_GiveMana(player_t * player, manatype_t mana, int count)
 
 static void TryPickupWeapon(player_t * player, pclass_t weaponClass,
                             weapontype_t weaponType, mobj_t * weapon,
-                            const char *message)
+                            char *message)
 {
     boolean remove;
     boolean gaveMana;
@@ -412,12 +412,12 @@ static void TryPickupWeaponPiece(player_t * player, pclass_t matchClass,
     boolean checkAssembled;
     boolean gaveWeapon;
     int gaveMana;
-    static const char *fourthWeaponText[] = {
+    static char *fourthWeaponText[] = {
         TXT_WEAPON_F4,
         TXT_WEAPON_C4,
         TXT_WEAPON_M4
     };
-    static const char *weaponPieceText[] = {
+    static char *weaponPieceText[] = {
         TXT_QUIETUS_PIECE,
         TXT_WRAITHVERGE_PIECE,
         TXT_BLOODSCOURGE_PIECE
@@ -711,7 +711,7 @@ boolean P_GivePower(player_t * player, powertype_t power)
 static void TryPickupArtifact(player_t * player, artitype_t artifactType,
                               mobj_t * artifact)
 {
-    static const char *artifactMessages[NUMARTIFACTS] = {
+    static char *artifactMessages[NUMARTIFACTS] = {
         NULL,
         TXT_ARTIINVULNERABILITY,
         TXT_ARTIHEALTH,
@@ -2174,7 +2174,7 @@ void P_PoisonDamage(player_t * player, mobj_t * source, int damage,
     {                           // mobj is invulnerable
         return;
     }
-    if (gameskill == sk_baby)
+    if (player && gameskill == sk_baby)
     {
         // Take half damage in trainer mode
         damage >>= 1;
@@ -2203,7 +2203,7 @@ void P_PoisonDamage(player_t * player, mobj_t * source, int damage,
     if (target->health <= 0)
     {                           // Death
         target->special1.i = damage;
-        if (inflictor && !player->morphTics)
+        if (player && inflictor && !player->morphTics)
         {                       // Check for flame death
             if ((inflictor->flags2 & MF2_FIREDAMAGE)
                 && (target->health > -50) && (damage > 25))

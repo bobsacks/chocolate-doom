@@ -1211,7 +1211,7 @@ static void ControllerEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI controller type: %u\n", controller);
+            fprintf(stderr, "Unknown MIDI controller type: %i\n", controller);
 #endif
             break;
     }
@@ -1304,7 +1304,7 @@ static void MetaEvent(opl_track_data_t *track, midi_event_t *event)
 
         default:
 #ifdef OPL_MIDI_DEBUG
-            fprintf(stderr, "Unknown MIDI meta event type: %u\n",
+            fprintf(stderr, "Unknown MIDI meta event type: %i\n",
                             event->data.meta.type);
 #endif
             break;
@@ -1511,12 +1511,6 @@ static void I_OPL_PlaySong(void *handle, boolean looping)
     {
         InitChannel(&channels[i]);
     }
-
-    // If the music was previously paused, it needs to be unpaused; playing
-    // a new song implies that we turn off pause. This matches vanilla
-    // behavior of the DMX library, and some of the higher-level code in
-    // s_sound.c relies on this.
-    OPL_SetPaused(0);
 }
 
 static void I_OPL_PauseSong(void)
@@ -1715,7 +1709,7 @@ static void I_OPL_ShutdownMusic(void)
 
 static boolean I_OPL_InitMusic(void)
 {
-    const char *dmxoption;
+    char *dmxoption;
     opl_init_result_t chip_type;
 
     OPL_SetSampleRate(snd_samplerate);

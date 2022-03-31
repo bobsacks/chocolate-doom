@@ -28,7 +28,7 @@ typedef void (*pcsound_shutdown_func)(void);
 
 struct pcsound_driver_s
 {
-    const char *name;
+    char *name;
     pcsound_init_func init_func;
     pcsound_shutdown_func shutdown_func;
 };

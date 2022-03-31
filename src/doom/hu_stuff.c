@@ -17,7 +17,6 @@
 
 
 #include <ctype.h>
-#include <stdlib.h>
 
 #include "doomdef.h"
 #include "doomkeys.h"
@@ -63,9 +62,21 @@
 
 
 
-char *chat_macros[10];
+char *chat_macros[10] =
+{
+    HUSTR_CHATMACRO0,
+    HUSTR_CHATMACRO1,
+    HUSTR_CHATMACRO2,
+    HUSTR_CHATMACRO3,
+    HUSTR_CHATMACRO4,
+    HUSTR_CHATMACRO5,
+    HUSTR_CHATMACRO6,
+    HUSTR_CHATMACRO7,
+    HUSTR_CHATMACRO8,
+    HUSTR_CHATMACRO9
+};
 
-const char *player_names[] =
+char*	player_names[] =
 {
     HUSTR_PLRGREEN,
     HUSTR_PLRINDIGO,
@@ -99,7 +110,7 @@ static boolean		headsupactive = false;
 // The actual names can be found in DStrings.h.
 //
 
-const char *mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
+char*	mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
 {
 
     HUSTR_E1M1,
@@ -153,7 +164,7 @@ const char *mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
     "NEWLEVEL"
 };
 
-const char *mapnames_chex[] =   // Chex Quest names.
+char*   mapnames_chex[] =   // Chex Quest names.
 {
 
     HUSTR_E1M1,
@@ -213,7 +224,7 @@ const char *mapnames_chex[] =   // Chex Quest names.
 // the layout in the Vanilla executable, where it is possible to
 // overflow the end of one array into the next.
 
-const char *mapnames_commercial[] =
+char *mapnames_commercial[] =
 {
     // DOOM 2 map names.
 
@@ -324,13 +335,7 @@ const char *mapnames_commercial[] =
     THUSTR_29,
     THUSTR_30,
     THUSTR_31,
-    THUSTR_32,
-
-    // Emulation: TNT maps 33-35 can be warped to and played if they exist
-    // so include blank names instead of spilling over
-    "",
-    "",
-    ""
+    THUSTR_32
 };
 
 void HU_Init(void)
@@ -359,7 +364,7 @@ void HU_Start(void)
 {
 
     int		i;
-    const char *s;
+    char*	s;
 
     if (headsupactive)
 	HU_Stop();
@@ -389,11 +394,6 @@ void HU_Start(void)
 	break;
       case doom2:
 	 s = HU_TITLE2;
-         // Pre-Final Doom compatibility: map33-map35 names don't spill over
-         if (gameversion <= exe_doom_1_9 && gamemap >= 33)
-         {
-             s = "";
-         }
 	 break;
       case pack_plut:
 	s = HU_TITLEP;
@@ -511,7 +511,7 @@ void HU_Ticker(void)
 			    message_counter = HU_MSGTIMEOUT;
 			    if ( gamemode == commercial )
 			      S_StartSound(0, sfx_radio);
-			    else if (gameversion > exe_doom_1_2)
+			    else
 			      S_StartSound(0, sfx_tink);
 			}
 			HUlib_resetIText(&w_inputbuffer[i]);
@@ -580,7 +580,7 @@ boolean HU_Responder(event_t *ev)
 {
 
     static char		lastmessage[HU_MAXLINELENGTH+1];
-    const char		*macromessage;
+    char*		macromessage;
     boolean		eatkey = false;
     static boolean	altdown = false;
     unsigned char 	c;

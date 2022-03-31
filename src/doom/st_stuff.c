@@ -21,7 +21,6 @@
 
 
 #include <stdio.h>
-#include <ctype.h>
 
 #include "i_system.h"
 #include "i_video.h"
@@ -308,9 +307,6 @@ static boolean		st_fragson;
 // main bar left
 static patch_t*		sbar;
 
-// main bar right, for doom 1.0
-static patch_t*		sbarr;
-
 // 0-9, tall numbers
 static patch_t*		tallnum[10];
 
@@ -426,10 +422,6 @@ void ST_refreshBackground(void)
 
 	V_DrawPatch(ST_X, 0, sbar);
 
-	// draw right side of bar if needed (Doom 1.0)
-	if (sbarr)
-	    V_DrawPatch(ST_ARMSBGX, 0, sbarr);
-
 	if (netgame)
 	    V_DrawPatch(ST_FX, 0, faceback);
 
@@ -478,7 +470,7 @@ ST_Responder (event_t* ev)
 	if (plyr->cheats & CF_GODMODE)
 	{
 	  if (plyr->mo)
-	    plyr->mo->health = deh_god_mode_health;
+	    plyr->mo->health = 100;
 	  
 	  plyr->health = deh_god_mode_health;
 	  plyr->message = DEH_String(STSTR_DQDON);
@@ -1094,7 +1086,7 @@ void ST_Drawer (boolean fullscreen, boolean refresh)
 
 }
 
-typedef void (*load_callback_t)(const char *lumpname, patch_t **variable);
+typedef void (*load_callback_t)(char *lumpname, patch_t **variable); 
 
 // Iterates through all graphics to be loaded or unloaded, along with
 // the variable they use, invoking the specified callback function.
@@ -1150,16 +1142,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     callback(namebuf, &faceback);
 
     // status bar background bits
-    if (W_CheckNumForName("STBAR") >= 0)
-    {
-        callback(DEH_String("STBAR"), &sbar);
-        sbarr = NULL;
-    }
-    else
-    {
-        callback(DEH_String("STMBARL"), &sbar);
-        callback(DEH_String("STMBARR"), &sbarr);
-    }
+    callback(DEH_String("STBAR"), &sbar);
 
     // face states
     facenum = 0;
@@ -1194,7 +1177,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     ++facenum;
 }
 
-static void ST_loadCallback(const char *lumpname, patch_t **variable)
+static void ST_loadCallback(char *lumpname, patch_t **variable)
 {
     *variable = W_CacheLumpName(lumpname, PU_STATIC);
 }
@@ -1210,7 +1193,7 @@ void ST_loadData(void)
     ST_loadGraphics();
 }
 
-static void ST_unloadCallback(const char *lumpname, patch_t **variable)
+static void ST_unloadCallback(char *lumpname, patch_t **variable)
 {
     W_ReleaseLumpName(lumpname);
     *variable = NULL;

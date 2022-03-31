@@ -32,13 +32,13 @@ struct txt_fileselect_s {
     txt_widget_t widget;
     txt_inputbox_t *inputbox;
     int size;
-    const char *prompt;
-    const char **extensions;
+    char *prompt;
+    char **extensions;
 };
 
 // Dummy value to select a directory.
 
-const char *TXT_DIRECTORY[] = { "__directory__", NULL };
+char *TXT_DIRECTORY[] = { "__directory__", NULL };
 
 #ifndef _WIN32
 
@@ -155,7 +155,7 @@ int TXT_CanSelectFiles(void)
     return 0;
 }
 
-char *TXT_SelectFile(const char *window_title, const char **extensions)
+char *TXT_SelectFile(char *window_title, char **extensions)
 {
     return NULL;
 }
@@ -175,18 +175,11 @@ static BOOL (*MySHGetPathFromIDList)(LPITEMIDLIST, LPTSTR) = NULL;
 
 static int LoadDLLs(void)
 {
-    HMODULE comdlg32, shell32
+    HMODULE comdlg32 = LoadLibraryW(L"comdlg32.dll");
+    HMODULE shell32 = LoadLibraryW(L"shell32.dll");
 
-    comdlg32 = LoadLibraryW(L"comdlg32.dll");
-    if (comdlg32 == NULL)
+    if (comdlg32 == NULL || shell32 == NULL)
     {
-        return 0;
-    }
-
-    shell32 = LoadLibraryW(L"shell32.dll");
-    if (shell32 == NULL)
-    {
-        FreeLibrary(comdlg32);
         return 0;
     }
 
@@ -217,7 +210,7 @@ static int InitLibraries(void)
 
 // Generate the "filter" string from the list of extensions.
 
-static char *GenerateFilterString(const char **extensions)
+static char *GenerateFilterString(char **extensions)
 {
     unsigned int result_len = 1;
     unsigned int i;
@@ -289,7 +282,7 @@ static char *SelectDirectory(char *window_title)
     return result;
 }
 
-char *TXT_SelectFile(const char *window_title, const char **extensions)
+char *TXT_SelectFile(char *window_title, char **extensions)
 {
     OPENFILENAME fm;
     char selected[MAX_PATH] = "";
@@ -338,50 +331,39 @@ char *TXT_SelectFile(const char *window_title, const char **extensions)
 // an Objective C dependency. This is rather silly.
 
 // Printf format string for the "wrapper" portion of the AppleScript:
-#define APPLESCRIPT_WRAPPER "copy POSIX path of (%s) to stdout"
 
-static char *CreateEscapedString(const char *original)
+#define APPLESCRIPT_WRAPPER \
+    "tell application (path to frontmost application as text)\n" \
+    "    activate\n" \
+    "    set theFile to (%s)\n" \
+    "    copy POSIX path of theFile to stdout\n" \
+    "end tell\n"
+
+static char *EscapedString(char *s)
 {
     char *result;
-    const char *in;
-    char *out;
+    char *in, *out;
 
-    // We need to take care not to overflow the buffer, so count exactly.
-#define ESCAPED_CHARS "\"\\"
-    size_t count_extras = 2;    // start counting the two quotes
-    for (in = original; *in; ++in)
-    {
-        if (strchr(ESCAPED_CHARS, *in))
-        {
-            ++count_extras;
-        }
-    }
-
-    result = malloc(strlen(original) + count_extras + 1);
-    if (!result)
-    {
-        return NULL;
-    }
+    result = malloc(strlen(s) + 3);
     out = result;
-    *out++ = '"';
-    for (in = original; *in; ++in)
+    *out++ = '\"';
+    for (in = s; *in != '\0'; ++in)
     {
-        if (strchr(ESCAPED_CHARS, *in))
+        if (*in == '\"' || *in == '\\')
         {
             *out++ = '\\';
         }
         *out++ = *in;
     }
-    *out++ = '"';
-    *out = 0;
+    *out++ = '\"';
+    *out = '\0';
 
     return result;
-#undef ESCAPED_CHARS
 }
 
 // Build list of extensions, like: {"wad","lmp","txt"}
 
-static char *CreateExtensionsList(const char **extensions)
+static char *ExtensionsList(char **extensions)
 {
     char *result, *escaped;
     unsigned int result_len;
@@ -399,27 +381,16 @@ static char *CreateExtensionsList(const char **extensions)
     }
 
     result = malloc(result_len);
-    if (!result)
-    {
-        return NULL;
-    }
     TXT_StringCopy(result, "{", result_len);
 
     for (i = 0; extensions[i] != NULL; ++i)
     {
-        escaped = CreateEscapedString(extensions[i]);
-        if (!escaped)
-        {
-            free(result);
-            return NULL;
-        }
+        escaped = EscapedString(extensions[i]);
         TXT_StringConcat(result, escaped, result_len);
         free(escaped);
 
         if (extensions[i + 1] != NULL)
-        {
             TXT_StringConcat(result, ",", result_len);
-        }
     }
 
     TXT_StringConcat(result, "}", result_len);
@@ -427,39 +398,30 @@ static char *CreateExtensionsList(const char **extensions)
     return result;
 }
 
-static char *GenerateSelector(const char *const window_title, const char **extensions)
+static char *GenerateSelector(char *window_title, char **extensions)
 {
-    const char *chooser;
-    char *ext_list = NULL;
-    char *window_title_escaped = NULL;
-    char *result = NULL;
-    unsigned int result_len = 64;
+    char *chooser, *ext_list, *result;
+    unsigned int result_len;
+
+    result_len = 64;
 
     if (extensions == TXT_DIRECTORY)
     {
         chooser = "choose folder";
+        ext_list = NULL;
     }
     else
     {
         chooser = "choose file";
-        ext_list = CreateExtensionsList(extensions);
-        if (!ext_list)
-        {
-            return NULL;
-        }
+        ext_list = ExtensionsList(extensions);
     }
 
     // Calculate size.
 
     if (window_title != NULL)
     {
-        window_title_escaped = CreateEscapedString(window_title);
-        if (!window_title_escaped)
-        {
-            free(ext_list);
-            return NULL;
-        }
-        result_len += strlen(window_title_escaped);
+        window_title = EscapedString(window_title);
+        result_len += strlen(window_title);
     }
     if (ext_list != NULL)
     {
@@ -467,51 +429,35 @@ static char *GenerateSelector(const char *const window_title, const char **exten
     }
 
     result = malloc(result_len);
-    if (!result)
-    {
-        free(window_title_escaped);
-        free(ext_list);
-        return NULL;
-    }
 
     TXT_StringCopy(result, chooser, result_len);
 
-    if (window_title_escaped != NULL)
+    if (window_title != NULL)
     {
         TXT_StringConcat(result, " with prompt ", result_len);
-        TXT_StringConcat(result, window_title_escaped, result_len);
+        TXT_StringConcat(result, window_title, result_len);
+        free(window_title);
     }
 
     if (ext_list != NULL)
     {
-        TXT_StringConcat(result, " of type ", result_len);
+        TXT_StringConcat(result, "of type ", result_len);
         TXT_StringConcat(result, ext_list, result_len);
+        free(ext_list);
     }
 
-    free(window_title_escaped);
-    free(ext_list);
     return result;
 }
 
-static char *GenerateAppleScript(const char *window_title, const char **extensions)
+static char *GenerateAppleScript(char *window_title, char **extensions)
 {
     char *selector, *result;
     size_t result_len;
 
     selector = GenerateSelector(window_title, extensions);
-    if (!selector)
-    {
-        return NULL;
-    }
 
     result_len = strlen(APPLESCRIPT_WRAPPER) + strlen(selector);
     result = malloc(result_len);
-    if (!result)
-    {
-        free(selector);
-        return NULL;
-    }
-
     TXT_snprintf(result, result_len, APPLESCRIPT_WRAPPER, selector);
     free(selector);
 
@@ -523,16 +469,12 @@ int TXT_CanSelectFiles(void)
     return 1;
 }
 
-char *TXT_SelectFile(const char *window_title, const char **extensions)
+char *TXT_SelectFile(char *window_title, char **extensions)
 {
     char *argv[4];
     char *result, *applescript;
 
     applescript = GenerateAppleScript(window_title, extensions);
-    if (!applescript)
-    {
-        return NULL;
-    }
 
     argv[0] = "/usr/bin/osascript";
     argv[1] = "-e";
@@ -553,7 +495,7 @@ char *TXT_SelectFile(const char *window_title, const char **extensions)
 
 #define ZENITY_BINARY "/usr/bin/zenity"
 
-static unsigned int NumExtensions(const char **extensions)
+static unsigned int NumExtensions(char **extensions)
 {
     unsigned int result = 0;
 
@@ -581,7 +523,7 @@ int TXT_CanSelectFiles(void)
 // return a pointer to a string that is a case-insensitive
 // pattern representation (like [Ww][Aa][Dd])
 //
-static char *ExpandExtension(const char *orig)
+static char *ExpandExtension(char *orig)
 {
     int oldlen, newlen, i;
     char *c, *newext = NULL;
@@ -614,7 +556,7 @@ static char *ExpandExtension(const char *orig)
     return newext;
 }
 
-char *TXT_SelectFile(const char *window_title, const char **extensions)
+char *TXT_SelectFile(char *window_title, char **extensions)
 {
     unsigned int i;
     size_t len;
@@ -628,8 +570,8 @@ char *TXT_SelectFile(const char *window_title, const char **extensions)
     }
 
     argv = calloc(5 + NumExtensions(extensions), sizeof(char *));
-    argv[0] = strdup(ZENITY_BINARY);
-    argv[1] = strdup("--file-selection");
+    argv[0] = ZENITY_BINARY;
+    argv[1] = "--file-selection";
     argc = 2;
 
     if (window_title != NULL)
@@ -669,7 +611,7 @@ char *TXT_SelectFile(const char *window_title, const char **extensions)
 
     result = ExecReadOutput(argv);
 
-    for (i = 0; i < argc; ++i)
+    for (i = 2; i < argc; ++i)
     {
         free(argv[i]);
     }
@@ -815,7 +757,7 @@ static void InputBoxChanged(TXT_UNCAST_ARG(widget), TXT_UNCAST_ARG(fileselect))
 }
 
 txt_fileselect_t *TXT_NewFileSelector(char **variable, int size,
-                                      const char *prompt, const char **extensions)
+                                      char *prompt, char **extensions)
 {
     txt_fileselect_t *fileselect;
 

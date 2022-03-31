@@ -27,7 +27,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <process.h>
-#include <shellapi.h>
 
 #else
 
@@ -54,9 +53,9 @@ struct execute_context_s
 // Returns the path to a temporary file of the given name, stored
 // inside the system temporary directory.
 
-static char *TempFile(const char *s)
+static char *TempFile(char *s)
 {
-    const char *tempdir;
+    char *tempdir;
 
 #ifdef _WIN32
     // Check the TEMP environment variable to find the location.
@@ -76,9 +75,9 @@ static char *TempFile(const char *s)
     return M_StringJoin(tempdir, DIR_SEPARATOR_S, s, NULL);
 }
 
-static int ArgumentNeedsEscape(const char *arg)
+static int ArgumentNeedsEscape(char *arg)
 {
-    const char *p;
+    char *p;
 
     for (p = arg; *p != '\0'; ++p)
     {
@@ -130,7 +129,7 @@ execute_context_t *NewExecuteContext(void)
     return result;
 }
 
-void AddCmdLineParameter(execute_context_t *context, const char *s, ...)
+void AddCmdLineParameter(execute_context_t *context, char *s, ...)
 {
     va_list args;
 
@@ -144,13 +143,8 @@ void AddCmdLineParameter(execute_context_t *context, const char *s, ...)
 
 #if defined(_WIN32)
 
-boolean OpenFolder(const char *path)
-{
-    // "If the function succeeds, it returns a value greater than 32."
-    return (int)ShellExecute(NULL, "open", path, NULL, NULL, SW_SHOWDEFAULT) > 32;
-}
-
 // Wait for the specified process to exit.  Returns the exit code.
+
 static unsigned int WaitForProcessExit(HANDLE subprocess)
 {
     DWORD exit_code;
@@ -262,22 +256,6 @@ static int ExecuteCommand(const char *program, const char *arg)
 }
 
 #else
-
-boolean OpenFolder(const char *path)
-{
-    char *cmd;
-    int result;
-
-#if defined(__MACOSX__)
-    cmd = M_StringJoin("open \"", path, "\"", NULL);
-#else
-    cmd = M_StringJoin("xdg-open \"", path, "\"", NULL);
-#endif
-    result = system(cmd);
-    free(cmd);
-
-    return result == 0;
-}
 
 // Given the specified program name, get the full path to the program,
 // assuming that it is in the same directory as this program is.

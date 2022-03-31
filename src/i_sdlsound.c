@@ -808,12 +808,21 @@ static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
     }
 }
 
+#ifdef HAVE_LIBSAMPLERATE
+
 // Preload all the sound effects - stops nasty ingame freezes
 
 static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 {
     char namebuf[9];
     int i;
+
+    // Don't need to precache the sounds unless we are using libsamplerate.
+
+    if (use_libsamplerate == 0)
+    {
+	return;
+    }
 
     printf("I_SDL_PrecacheSounds: Precaching all sound effects..");
 
@@ -837,6 +846,15 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 
     printf("\n");
 }
+
+#else
+
+static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
+{
+    // no-op
+}
+
+#endif
 
 // Load a SFX chunk into memory and ensure that it is locked.
 
@@ -1057,6 +1075,18 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 {
     int i;
 
+    // SDL 2.0.6 has a bug that makes it unusable.
+    if (SDL_COMPILEDVERSION == SDL_VERSIONNUM(2, 0, 6))
+    {
+        I_Error(
+            "I_SDL_InitSound: "
+            "You are trying to launch with SDL 2.0.6 which has a known bug "
+            "that makes the game crash. Please either downgrade to "
+            "SDL 2.0.5 or upgrade to 2.0.7. See the following bug for some "
+            "additional context:\n"
+            "<https://github.com/chocolate-doom/chocolate-doom/issues/945>");
+    }
+
     use_sfx_prefix = _use_sfx_prefix;
 
     // No sounds yet
@@ -1071,7 +1101,7 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
         return false;
     }
 
-    if (Mix_OpenAudioDevice(snd_samplerate, AUDIO_S16SYS, 2, GetSliceSize(), NULL, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE) < 0)
+    if (Mix_OpenAudio(snd_samplerate, AUDIO_S16SYS, 2, GetSliceSize()) < 0)
     {
         fprintf(stderr, "Error initialising SDL_mixer: %s\n", Mix_GetError());
         return false;

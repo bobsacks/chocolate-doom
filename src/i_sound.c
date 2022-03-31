@@ -52,19 +52,13 @@ char *snd_musiccmd = "";
 
 int snd_pitchshift = -1;
 
-int snd_musicdevice = SNDDEVICE_SB;
-int snd_sfxdevice = SNDDEVICE_SB;
-
 // Low-level sound and music modules we are using
+
 static sound_module_t *sound_module;
 static music_module_t *music_module;
 
-// If true, the music pack module was successfully initialized.
-static boolean music_packs_active = false;
-
-// This is either equal to music_module or &music_pack_module,
-// depending on whether the current track is substituted.
-static music_module_t *active_music_module;
+int snd_musicdevice = SNDDEVICE_SB;
+int snd_sfxdevice = SNDDEVICE_SB;
 
 // Sound modules
 
@@ -73,7 +67,6 @@ extern sound_module_t sound_sdl_module;
 extern sound_module_t sound_pcsound_module;
 extern music_module_t music_sdl_module;
 extern music_module_t music_opl_module;
-extern music_module_t music_pack_module;
 
 // For OPL module:
 
@@ -83,7 +76,6 @@ extern int opl_io_port;
 // For native music module:
 
 extern char *music_pack_path;
-extern char *fluidsynth_sf_path;
 extern char *timidity_cfg_path;
 
 // DOS-specific options: These are unused but should be maintained
@@ -195,8 +187,8 @@ static void InitMusicModule(void)
 //
 
 void I_InitSound(boolean use_sfx_prefix)
-{
-    boolean nosound, nosfx, nomusic, nomusicpacks;
+{  
+    boolean nosound, nosfx, nomusic;
 
     //!
     // @vanilla
@@ -222,16 +214,6 @@ void I_InitSound(boolean use_sfx_prefix)
 
     nomusic = M_CheckParm("-nomusic") > 0;
 
-    //!
-    //
-    // Disable substitution music packs.
-    //
-
-    nomusicpacks = M_ParmExists("-nomusicpacks");
-
-    // Auto configure the music pack directory.
-    M_SetMusicPackDir();
-
     // Initialize the sound and music subsystems.
 
     if (!nosound && !screensaver_mode)
@@ -255,13 +237,6 @@ void I_InitSound(boolean use_sfx_prefix)
         if (!nomusic)
         {
             InitMusicModule();
-            active_music_module = music_module;
-        }
-
-        // We may also have substitute MIDIs we can load.
-        if (!nomusicpacks && music_module != NULL)
-        {
-            music_packs_active = music_pack_module.Init();
         }
     }
 }
@@ -273,11 +248,6 @@ void I_ShutdownSound(void)
         sound_module->Shutdown();
     }
 
-    if (music_packs_active)
-    {
-        music_pack_module.Shutdown();
-    }
-
     if (music_module != NULL)
     {
         music_module->Shutdown();
@@ -286,7 +256,7 @@ void I_ShutdownSound(void)
 
 int I_GetSfxLumpNum(sfxinfo_t *sfxinfo)
 {
-    if (sound_module != NULL)
+    if (sound_module != NULL) 
     {
         return sound_module->GetSfxLumpNum(sfxinfo);
     }
@@ -303,9 +273,9 @@ void I_UpdateSound(void)
         sound_module->Update();
     }
 
-    if (active_music_module != NULL && active_music_module->Poll != NULL)
+    if (music_module != NULL && music_module->Poll != NULL)
     {
-        active_music_module->Poll();
+        music_module->Poll();
     }
 }
 
@@ -394,53 +364,30 @@ void I_SetMusicVolume(int volume)
     if (music_module != NULL)
     {
         music_module->SetMusicVolume(volume);
-
-        if (music_packs_active && music_module != &music_pack_module)
-        {
-            music_pack_module.SetMusicVolume(volume);
-        }
     }
 }
 
 void I_PauseSong(void)
 {
-    if (active_music_module != NULL)
+    if (music_module != NULL)
     {
-        active_music_module->PauseMusic();
+        music_module->PauseMusic();
     }
 }
 
 void I_ResumeSong(void)
 {
-    if (active_music_module != NULL)
+    if (music_module != NULL)
     {
-        active_music_module->ResumeMusic();
+        music_module->ResumeMusic();
     }
 }
 
 void *I_RegisterSong(void *data, int len)
 {
-    // If the music pack module is active, check to see if there is a
-    // valid substitution for this track. If there is, we set the
-    // active_music_module pointer to the music pack module for the
-    // duration of this particular track.
-    if (music_packs_active)
+    if (music_module != NULL)
     {
-        void *handle;
-
-        handle = music_pack_module.RegisterSong(data, len);
-        if (handle != NULL)
-        {
-            active_music_module = &music_pack_module;
-            return handle;
-        }
-    }
-
-    // No substitution for this track, so use the main module.
-    active_music_module = music_module;
-    if (active_music_module != NULL)
-    {
-        return active_music_module->RegisterSong(data, len);
+        return music_module->RegisterSong(data, len);
     }
     else
     {
@@ -450,33 +397,33 @@ void *I_RegisterSong(void *data, int len)
 
 void I_UnRegisterSong(void *handle)
 {
-    if (active_music_module != NULL)
+    if (music_module != NULL)
     {
-        active_music_module->UnRegisterSong(handle);
+        music_module->UnRegisterSong(handle);
     }
 }
 
 void I_PlaySong(void *handle, boolean looping)
 {
-    if (active_music_module != NULL)
+    if (music_module != NULL)
     {
-        active_music_module->PlaySong(handle, looping);
+        music_module->PlaySong(handle, looping);
     }
 }
 
 void I_StopSong(void)
 {
-    if (active_music_module != NULL)
+    if (music_module != NULL)
     {
-        active_music_module->StopSong();
+        music_module->StopSong();
     }
 }
 
 boolean I_MusicIsPlaying(void)
 {
-    if (active_music_module != NULL)
+    if (music_module != NULL)
     {
-        return active_music_module->MusicIsPlaying();
+        return music_module->MusicIsPlaying();
     }
     else
     {
@@ -505,7 +452,6 @@ void I_BindSoundVariables(void)
     M_BindIntVariable("snd_pitchshift",          &snd_pitchshift);
 
     M_BindStringVariable("music_pack_path",      &music_pack_path);
-    M_BindStringVariable("fluidsynth_sf_path",   &fluidsynth_sf_path);
     M_BindStringVariable("timidity_cfg_path",    &timidity_cfg_path);
     M_BindStringVariable("gus_patch_path",       &gus_patch_path);
     M_BindIntVariable("gus_ram_kb",              &gus_ram_kb);

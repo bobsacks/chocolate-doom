@@ -66,17 +66,7 @@ extern int key_weapon5;
 extern int key_weapon6;
 extern int key_weapon7;
 extern int key_weapon8;
-
-extern int key_arti_quartz;
-extern int key_arti_urn;
-extern int key_arti_bomb;
-extern int key_arti_tome;
-extern int key_arti_ring;
-extern int key_arti_chaosdevice;
-extern int key_arti_shadowsphere;
-extern int key_arti_wings;
-extern int key_arti_torch;
-extern int key_arti_morph;
+extern int key_weapon9;
 
 extern int key_arti_all;
 extern int key_arti_health;
@@ -136,21 +126,16 @@ extern int key_menu_screenshot;
 extern int mousebfire;
 extern int mousebstrafe;
 extern int mousebforward;
-extern int mousebspeed;
 
 extern int mousebjump;
 
 extern int mousebstrafeleft;
 extern int mousebstraferight;
-extern int mousebturnleft;
-extern int mousebturnright;
 extern int mousebbackward;
 extern int mousebuse;
 
 extern int mousebprevweapon;
 extern int mousebnextweapon;
-extern int mousebinvleft;
-extern int mousebinvright;
 
 extern int joybfire;
 extern int joybstrafe;

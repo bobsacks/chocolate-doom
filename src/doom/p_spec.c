@@ -149,7 +149,7 @@ void P_InitPicAnims (void)
     lastanim = anims;
     for (i=0 ; animdefs[i].istexture != -1 ; i++)
     {
-        const char *startname, *endname;
+        char *startname, *endname;
 
         startname = DEH_String(animdefs[i].startname);
         endname = DEH_String(animdefs[i].endname);
@@ -509,36 +509,24 @@ P_CrossSpecialLine
 
     line = &lines[linenum];
     
-    if (gameversion <= exe_doom_1_2)
-    {
-        if (line->special > 98 && line->special != 104)
-        {
-            return;
-        }
-    }
-    else
-    {
-        //	Triggers that other things can activate
-        if (!thing->player)
-        {
-            // Things that should NOT trigger specials...
-            switch(thing->type)
-            {
-                case MT_ROCKET:
-                case MT_PLASMA:
-                case MT_BFG:
-                case MT_TROOPSHOT:
-                case MT_HEADSHOT:
-                case MT_BRUISERSHOT:
-                    return;
-
-                default: break;
-            }
-        }
-    }
-
+    //	Triggers that other things can activate
     if (!thing->player)
     {
+	// Things that should NOT trigger specials...
+	switch(thing->type)
+	{
+	  case MT_ROCKET:
+	  case MT_PLASMA:
+	  case MT_BFG:
+	  case MT_TROOPSHOT:
+	  case MT_HEADSHOT:
+	  case MT_BRUISERSHOT:
+	    return;
+	    break;
+	    
+	  default: break;
+	}
+		
 	ok = 0;
 	switch(line->special)
 	{
@@ -1381,19 +1369,6 @@ int EV_DoDonut(line_t*	line)
 short		numlinespecials;
 line_t*		linespeciallist[MAXLINEANIMS];
 
-static unsigned int NumScrollers()
-{
-    unsigned int i, scrollers = 0;
-
-    for (i = 0; i < numlines; i++)
-    {
-        if (48 == lines[i].special)
-        {
-            scrollers++;
-        }
-    }
-    return scrollers;
-}
 
 // Parses command line parameters.
 void P_SpawnSpecials (void)
@@ -1488,8 +1463,8 @@ void P_SpawnSpecials (void)
 	  case 48:
             if (numlinespecials >= MAXLINEANIMS)
             {
-                I_Error("Too many scrolling wall linedefs (%d)! "
-                        "(Vanilla limit is 64)", NumScrollers());
+                I_Error("Too many scrolling wall linedefs! "
+                        "(Vanilla limit is 64)");
             }
 	    // EFFECT FIRSTCOL SCROLL+
 	    linespeciallist[numlinespecials] = &lines[i];

@@ -93,7 +93,7 @@ int			quickSaveSlot;
  // 1 = message to be printed
 int			messageToPrint;
 // ...and here is the message string!
-const char		*messageString;
+char*			messageString;
 
 // message x & y
 int			messx;
@@ -146,8 +146,8 @@ short		whichCursor;		// which skull to draw
 
 // graphic name of cursors
 // haleyjd 08/27/10: [STRIFE] M_SKULL* -> M_CURS*
-const char *cursorName[8] = {"M_CURS1", "M_CURS2", "M_CURS3", "M_CURS4",
-                             "M_CURS5", "M_CURS6", "M_CURS7", "M_CURS8" };
+char    *cursorName[8] = {"M_CURS1", "M_CURS2", "M_CURS3", "M_CURS4", 
+                          "M_CURS5", "M_CURS6", "M_CURS7", "M_CURS8" };
 
 // haleyjd 20110210 [STRIFE]: skill level for menus
 int menuskill;
@@ -206,9 +206,9 @@ void M_SetupNextMenu(menu_t *menudef);
 void M_DrawThermo(int x,int y,int thermWidth,int thermDot);
 void M_DrawEmptyCell(menu_t *menu,int item);
 void M_DrawSelCell(menu_t *menu,int item);
-int  M_StringWidth(const char *string);
-int  M_StringHeight(const char *string);
-void M_StartMessage(const char *string,void *routine,boolean input);
+int  M_StringWidth(char *string);
+int  M_StringHeight(char *string);
+void M_StartMessage(char *string,void *routine,boolean input);
 void M_StopMessage(void);
 
 
@@ -547,7 +547,6 @@ void M_ReadSaveStrings(void)
 
     for(i = 0; i < load_end; i++)
     {
-        int retval;
         if(fname)
             Z_Free(fname);
         fname = M_SafeFilePath(savegamedir, M_MakeStrifeSaveDir(i, "\\name"));
@@ -555,14 +554,14 @@ void M_ReadSaveStrings(void)
         handle = fopen(fname, "rb");
         if(handle == NULL)
         {
-            M_StringCopy(savegamestrings[i], DEH_String(EMPTYSTRING),
+            M_StringCopy(savegamestrings[i], EMPTYSTRING,
                          sizeof(savegamestrings[i]));
             LoadMenu[i].status = 0;
             continue;
         }
-        retval = fread(savegamestrings[i], 1, SAVESTRINGSIZE, handle);
+        fread(savegamestrings[i], 1, SAVESTRINGSIZE, handle);
         fclose(handle);
-        LoadMenu[i].status = retval == SAVESTRINGSIZE;
+        LoadMenu[i].status = 1;
     }
 
     if(fname)
@@ -769,7 +768,7 @@ void M_SaveSelect(int choice)
     //saveSlot = choice;
 
     M_StringCopy(saveOldString, savegamestrings[choice], sizeof(saveOldString));
-    if (!strcmp(savegamestrings[choice], DEH_String(EMPTYSTRING)))
+    if (!strcmp(savegamestrings[choice],EMPTYSTRING))
         savegamestrings[choice][0] = 0;
     saveCharIndex = strlen(savegamestrings[choice]);
 }
@@ -1462,7 +1461,7 @@ M_DrawSelCell
 
 void
 M_StartMessage
-( const char	*string,
+( char*		string,
   void*		routine,
   boolean	input )
 {
@@ -1488,7 +1487,7 @@ void M_StopMessage(void)
 //
 // Find string width from hu_font chars
 //
-int M_StringWidth(const char *string)
+int M_StringWidth(char* string)
 {
     size_t             i;
     int             w = 0;
@@ -1511,7 +1510,7 @@ int M_StringWidth(const char *string)
 //
 //      Find string height from hu_font chars
 //
-int M_StringHeight(const char *string)
+int M_StringHeight(char* string)
 {
     size_t             i;
     int             h;
@@ -2292,7 +2291,7 @@ void M_Drawer (void)
     unsigned int	i;
     unsigned int	max;
     char		string[80];
-    const char          *name;
+    char               *name;
     int			start;
 
     inhelpscreens = false;

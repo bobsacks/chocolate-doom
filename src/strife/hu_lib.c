@@ -41,10 +41,10 @@ extern boolean D_PatchClipCallback(patch_t *patch, int x, int y); // [STRIFE]
 //
 // haleyjd 20100918: [STRIFE] New function.
 //
-void HUlib_drawYellowText(int x, int y, const char *text)
+void HUlib_drawYellowText(int x, int y, char *text)
 {
     int start_x = x;
-    const char *rover = text;
+    char *rover = text;
     char c;
 
     while((c = *rover++))
@@ -309,8 +309,8 @@ void HUlib_addLineToSText(hu_stext_t* s)
 void
 HUlib_addMessageToSText
 ( hu_stext_t*	s,
-  const char	*prefix,
-  const char	*msg )
+  char*		prefix,
+  char*		msg )
 {
     HUlib_addLineToSText(s);
     if (prefix)

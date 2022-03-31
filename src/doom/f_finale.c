@@ -19,7 +19,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include <stdlib.h>
 
 // Functions.
 #include "deh_main.h"
@@ -62,8 +61,8 @@ typedef struct
 {
     GameMission_t mission;
     int episode, level;
-    const char *background;
-    const char *text;
+    char *background;
+    char *text;
 } textscreen_t;
 
 static textscreen_t textscreens[] =
@@ -95,8 +94,8 @@ static textscreen_t textscreens[] =
     { pack_plut, 1, 31, "RROCK19",   P6TEXT},
 };
 
-const char *finaletext;
-const char *finaleflat;
+char*	finaletext;
+char*	finaleflat;
 
 void	F_StartCast (void);
 void	F_CastTicker (void);
@@ -232,7 +231,7 @@ void F_TextWrite (void)
     
     int		x,y,w;
     signed int	count;
-    const char *ch;
+    char*	ch;
     int		c;
     int		cx;
     int		cy;
@@ -300,7 +299,7 @@ void F_TextWrite (void)
 //
 typedef struct
 {
-    const char	*name;
+    char		*name;
     mobjtype_t	type;
 } castinfo_t;
 
@@ -484,9 +483,9 @@ boolean F_CastResponder (event_t* ev)
 }
 
 
-void F_CastPrint (const char *text)
+void F_CastPrint (char* text)
 {
-    const char *ch;
+    char*	ch;
     int		c;
     int		cx;
     int		w;
@@ -661,7 +660,7 @@ void F_BunnyScroll (void)
 
 static void F_ArtScreenDrawer(void)
 {
-    const char *lumpname;
+    char *lumpname;
     
     if (gameepisode == 3)
     {

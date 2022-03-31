@@ -158,7 +158,7 @@ typedef struct rndmessage_s
 {
     const char *type_name;
     int nummessages;
-    const char *messages[MAXRNDMESSAGES];
+    char *messages[MAXRNDMESSAGES];
 } rndmessage_t;
 
 static rndmessage_t rndMessages[] = 
@@ -375,7 +375,7 @@ static menu_t dialogmenu =
 static int dialogbgpiclumpnum;
 
 // Name of current speaking character.
-static const char *dialogname;
+static char *dialogname;
 
 // Current dialog text.
 static const char *dialogtext;
@@ -1152,7 +1152,7 @@ void P_DialogDoChoice(int choice)
 {
     int i = 0, nextdialog = 0;
     boolean candochoice = true;
-    const char *message = NULL;
+    char *message = NULL;
     mapdlgchoice_t *currentchoice;
 
     if(choice == -1)
@@ -1261,7 +1261,7 @@ void P_DialogStart(player_t *player)
     int i = 0;
     int pic;
     int rnd = 0;
-    const char *byetext;
+    char* byetext;
     int jumptoconv;
 
     if(menuactive || netgame)

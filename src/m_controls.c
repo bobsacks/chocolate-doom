@@ -54,17 +54,6 @@ int key_invleft = '[';
 int key_invright = ']';
 int key_useartifact = KEY_ENTER;
 
-int key_arti_quartz = 0;
-int key_arti_urn = 0;
-int key_arti_bomb = 0;
-int key_arti_tome = 127;
-int key_arti_ring = 0;
-int key_arti_chaosdevice = 0;
-int key_arti_shadowsphere = 0;
-int key_arti_wings = 0;
-int key_arti_torch = 0;
-int key_arti_morph = 0;
-
 //
 // Hexen key controls
 //
@@ -107,21 +96,17 @@ int key_invdrop   = KEY_BACKSPACE;
 int mousebfire = 0;
 int mousebstrafe = 1;
 int mousebforward = 2;
-int mousebspeed = 3;
 
 int mousebjump = -1;
 
 int mousebstrafeleft = -1;
 int mousebstraferight = -1;
-int mousebturnleft = -1;
-int mousebturnright = -1;
 int mousebbackward = -1;
 int mousebuse = -1;
 
 int mousebprevweapon = -1;
 int mousebnextweapon = -1;
-int mousebinvleft = -1;
-int mousebinvright = -1;
+
 
 int key_message_refresh = KEY_ENTER;
 int key_pause = KEY_PAUSE;
@@ -143,6 +128,7 @@ int key_weapon5 = '5';
 int key_weapon6 = '6';
 int key_weapon7 = '7';
 int key_weapon8 = '8';
+int key_weapon9 = '9';
 int key_prevweapon = 0;
 int key_nextweapon = 0;
 
@@ -234,7 +220,6 @@ void M_BindBaseControls(void)
     M_BindIntVariable("mouseb_fire",        &mousebfire);
     M_BindIntVariable("mouseb_strafe",      &mousebstrafe);
     M_BindIntVariable("mouseb_forward",     &mousebforward);
-    M_BindIntVariable("mouseb_speed",       &mousebspeed);
 
     M_BindIntVariable("joyb_fire",          &joybfire);
     M_BindIntVariable("joyb_strafe",        &joybstrafe);
@@ -250,8 +235,6 @@ void M_BindBaseControls(void)
     M_BindIntVariable("joyb_straferight",    &joybstraferight);
     M_BindIntVariable("mouseb_strafeleft",   &mousebstrafeleft);
     M_BindIntVariable("mouseb_straferight",  &mousebstraferight);
-    M_BindIntVariable("mouseb_turnleft",     &mousebturnleft);
-    M_BindIntVariable("mouseb_turnright",    &mousebturnright);
     M_BindIntVariable("mouseb_use",          &mousebuse);
     M_BindIntVariable("mouseb_backward",     &mousebbackward);
     M_BindIntVariable("dclick_use",          &dclick_use);
@@ -272,20 +255,6 @@ void M_BindHereticControls(void)
     M_BindIntVariable("key_invleft",        &key_invleft);
     M_BindIntVariable("key_invright",       &key_invright);
     M_BindIntVariable("key_useartifact",    &key_useartifact);
-
-    M_BindIntVariable("mouseb_invleft", &mousebinvleft);
-    M_BindIntVariable("mouseb_invright", &mousebinvright);
-
-    M_BindIntVariable("key_arti_quartz",        &key_arti_quartz);
-    M_BindIntVariable("key_arti_urn",           &key_arti_urn);
-    M_BindIntVariable("key_arti_bomb",          &key_arti_bomb);
-    M_BindIntVariable("key_arti_tome",          &key_arti_tome);
-    M_BindIntVariable("key_arti_ring",          &key_arti_ring);
-    M_BindIntVariable("key_arti_chaosdevice",   &key_arti_chaosdevice);
-    M_BindIntVariable("key_arti_shadowsphere",  &key_arti_shadowsphere);
-    M_BindIntVariable("key_arti_wings",         &key_arti_wings);
-    M_BindIntVariable("key_arti_torch",         &key_arti_torch);
-    M_BindIntVariable("key_arti_morph",         &key_arti_morph);
 }
 
 void M_BindHexenControls(void)
@@ -349,6 +318,7 @@ void M_BindWeaponControls(void)
     M_BindIntVariable("key_weapon6",        &key_weapon6);
     M_BindIntVariable("key_weapon7",        &key_weapon7);
     M_BindIntVariable("key_weapon8",        &key_weapon8);
+    M_BindIntVariable("key_weapon9",        &key_weapon9);
 
     M_BindIntVariable("key_prevweapon",     &key_prevweapon);
     M_BindIntVariable("key_nextweapon",     &key_nextweapon);

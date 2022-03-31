@@ -69,7 +69,7 @@ typedef enum
 typedef struct
 {
     ItemType_t type;
-    const char *text;
+    char *text;
     boolean(*func) (int option);
     int option;
     MenuType_t menu;
@@ -330,7 +330,7 @@ static void InitFonts(void)
 //
 //---------------------------------------------------------------------------
 
-void MN_DrTextA(const char *text, int x, int y)
+void MN_DrTextA(char *text, int x, int y)
 {
     char c;
     patch_t *p;
@@ -358,7 +358,7 @@ void MN_DrTextA(const char *text, int x, int y)
 //
 //---------------------------------------------------------------------------
 
-int MN_TextAWidth(const char *text)
+int MN_TextAWidth(char *text)
 {
     char c;
     int width;
@@ -388,7 +388,7 @@ int MN_TextAWidth(const char *text)
 //
 //---------------------------------------------------------------------------
 
-void MN_DrTextB(const char *text, int x, int y)
+void MN_DrTextB(char *text, int x, int y)
 {
     char c;
     patch_t *p;
@@ -416,7 +416,7 @@ void MN_DrTextB(const char *text, int x, int y)
 //
 //---------------------------------------------------------------------------
 
-int MN_TextBWidth(const char *text)
+int MN_TextBWidth(char *text)
 {
     char c;
     int width;
@@ -459,7 +459,7 @@ void MN_Ticker(void)
 //
 //---------------------------------------------------------------------------
 
-const char *QuitEndMsg[] = {
+char *QuitEndMsg[] = {
     "ARE YOU SURE YOU WANT TO QUIT?",
     "ARE YOU SURE YOU WANT TO END THE GAME?",
     "DO YOU WANT TO QUICKSAVE THE GAME NAMED",
@@ -472,8 +472,8 @@ void MN_Drawer(void)
     int x;
     int y;
     MenuItem_t *item;
-    const char *message;
-    const char *selName;
+    char *message;
+    char *selName;
 
     if (MenuActive == false)
     {
@@ -595,7 +595,7 @@ static void DrawFilesMenu(void)
 
 static void DrawLoadMenu(void)
 {
-    const char *title;
+    char *title;
 
     title = DEH_String("LOAD GAME");
 
@@ -615,7 +615,7 @@ static void DrawLoadMenu(void)
 
 static void DrawSaveMenu(void)
 {
-    const char *title;
+    char *title;
 
     title = DEH_String("SAVE GAME");
 
@@ -642,7 +642,6 @@ void MN_LoadSlotText(void)
 
     for (i = 0; i < 6; i++)
     {
-        int retval;
         filename = SV_Filename(i);
         fp = fopen(filename, "rb+");
 	free(filename);
@@ -653,9 +652,9 @@ void MN_LoadSlotText(void)
             SlotStatus[i] = 0;
             continue;
         }
-        retval = fread(&SlotText[i], 1, SLOTTEXTLEN, fp);
+        fread(&SlotText[i], SLOTTEXTLEN, 1, fp);
         fclose(fp);
-        SlotStatus[i] = retval == SLOTTEXTLEN;
+        SlotStatus[i] = 1;
     }
     slottextloaded = true;
 }
@@ -1525,10 +1524,9 @@ boolean MN_Responder(event_t * event)
         {
             if (slotptr)
             {
-                *textBuffer = 0;
-                slotptr--;
-                textBuffer = &SlotText[currentSlot][slotptr];
+                *textBuffer-- = 0;
                 *textBuffer = ASCII_CURSOR;
+                slotptr--;
             }
             return (true);
         }

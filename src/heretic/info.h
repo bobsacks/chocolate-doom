@@ -1374,7 +1374,7 @@ typedef struct
 } state_t;
 
 extern state_t states[NUMSTATES];
-extern const char *sprnames[];
+extern char *sprnames[];
 
 
 

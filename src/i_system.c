@@ -131,7 +131,6 @@ byte *I_ZoneBase (int *size)
     int p;
 
     //!
-    // @category obscure
     // @arg <mb>
     //
     // Specify the heap size, in MiB (default 16).
@@ -158,7 +157,7 @@ byte *I_ZoneBase (int *size)
     return zonemem;
 }
 
-void I_PrintBanner(const char *msg)
+void I_PrintBanner(char *msg)
 {
     int i;
     int spaces = 35 - (strlen(msg) / 2);
@@ -181,7 +180,7 @@ void I_PrintDivider(void)
     putchar('\n');
 }
 
-void I_PrintStartupBanner(const char *gamedescription)
+void I_PrintStartupBanner(char *gamedescription)
 {
     I_PrintDivider();
     I_PrintBanner(gamedescription);
@@ -261,7 +260,7 @@ void I_Quit (void)
 
 static boolean already_quitting = false;
 
-void I_Error (const char *error, ...)
+void I_Error (char *error, ...)
 {
     char msgbuf[512];
     va_list argptr;
@@ -306,12 +305,6 @@ void I_Error (const char *error, ...)
         entry = entry->next;
     }
 
-    //!
-    // @category obscure
-    //
-    // If specified, don't show a GUI window for error messages when the
-    // game exits with an error.
-    //
     exit_gui_popup = !M_ParmExists("-nogui");
 
     // Pop up a GUI dialog box to show the error message, if the
@@ -342,7 +335,7 @@ void *I_Realloc(void *ptr, size_t size)
 
     if (size != 0 && new_ptr == NULL)
     {
-        I_Error ("I_Realloc: failed on reallocation of %zu bytes", size);
+        I_Error ("I_Realloc: failed on reallocation of %i bytes", size);
     }
 
     return new_ptr;
