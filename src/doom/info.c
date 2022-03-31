@@ -33,7 +33,7 @@ char *sprnames[] = {
     "TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
     "MISF","SAWG","PLSG","PLSF","FLMG","FLMF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
     "PLSS","PLSE","FLMS","FLME","MISL","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
-    "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
+    "SPOS","VILE","FIRE","BURN","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
     "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
     "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","FCAN",
     "BON1","BON2","BKEY","RKEY","YKEY","BSKU","RSKU","YSKU","STIM","MEDI",
@@ -90,6 +90,7 @@ void A_VileTarget();
 void A_VileAttack();
 void A_StartFire();
 void A_Fire();
+//void A_Fire();
 void A_FireCrackle();
 void A_Tracer();
 void A_SkelWhoosh();
@@ -259,7 +260,7 @@ state_t	states[NUMSTATES] = {
     //{SPR_FLME,32771,4,{NULL},S_FLAMEXP5,0,0},	// S_FLAMEXP4
     //A_StartFire
     {SPR_FLME,32771,4,{NULL},S_FLAMEXP5,0,0},	// S_FLAMEXP4
-    {SPR_FLME,32772,4,{NULL},S_FIRE2,0,0},	// S_PFLAMEXP5
+    {SPR_FLME,32772,4,{NULL},S_BURN1,0,0},	// S_PFLAMEXP5
     {SPR_MISL,32768,1,{NULL},S_ROCKET,0,0},	// S_ROCKET
     {SPR_BFS1,32768,4,{NULL},S_BFGSHOT2,0,0},	// S_BFGSHOT
     {SPR_BFS1,32769,4,{NULL},S_BFGSHOT,0,0},	// S_BFGSHOT2
@@ -457,6 +458,36 @@ state_t	states[NUMSTATES] = {
     {SPR_FIRE,32775,2,{A_Fire},S_FIRE29,0,0},	// S_FIRE28
     {SPR_FIRE,32774,2,{A_Fire},S_FIRE30,0,0},	// S_FIRE29
     {SPR_FIRE,32775,2,{A_Fire},S_NULL,0,0},	// S_FIRE30
+    {SPR_BURN,32768,2,{A_StartFire},S_BURN2,0,0},	// S_BURN1
+    {SPR_BURN,32769,2,{A_Fire},S_BURN3,0,0},	// S_BURN2
+    {SPR_BURN,32768,2,{A_Fire},S_BURN4,0,0},	// S_BURN3
+    {SPR_BURN,32769,2,{A_Fire},S_BURN5,0,0},	// S_BURN4
+    {SPR_BURN,32770,2,{A_FireCrackle},S_BURN6,0,0},	// S_BURN5
+    {SPR_BURN,32769,2,{A_Fire},S_BURN7,0,0},	// S_BURN6
+    {SPR_BURN,32770,2,{A_Fire},S_BURN8,0,0},	// S_BURN7
+    {SPR_BURN,32769,2,{A_Fire},S_BURN9,0,0},	// S_BURN8
+    {SPR_BURN,32770,2,{A_Fire},S_BURN10,0,0},	// S_BURN9
+    {SPR_BURN,32771,2,{A_Fire},S_BURN11,0,0},	// S_BURN10
+    {SPR_BURN,32770,2,{A_Fire},S_BURN12,0,0},	// S_BURN11
+    {SPR_BURN,32771,2,{A_Fire},S_BURN13,0,0},	// S_BURN12
+    {SPR_BURN,32770,2,{A_Fire},S_BURN14,0,0},	// S_BURN13
+    {SPR_BURN,32771,2,{A_Fire},S_BURN15,0,0},	// S_BURN14
+    {SPR_BURN,32772,2,{A_Fire},S_BURN16,0,0},	// S_BURN15
+    {SPR_BURN,32771,2,{A_Fire},S_BURN17,0,0},	// S_BURN16
+    {SPR_BURN,32772,2,{A_Fire},S_BURN18,0,0},	// S_BURN17
+    {SPR_BURN,32771,2,{A_Fire},S_BURN19,0,0},	// S_BURN18
+    {SPR_BURN,32772,2,{A_FireCrackle},S_BURN20,0,0},	// S_BURN19
+    {SPR_BURN,32773,2,{A_Fire},S_BURN21,0,0},	// S_BURN20
+    {SPR_BURN,32772,2,{A_Fire},S_BURN22,0,0},	// S_BURN21
+    {SPR_BURN,32773,2,{A_Fire},S_BURN23,0,0},	// S_BURN22
+    {SPR_BURN,32772,2,{A_Fire},S_BURN24,0,0},	// S_BURN23
+    {SPR_BURN,32773,2,{A_Fire},S_BURN25,0,0},	// S_BURN24
+    {SPR_BURN,32774,2,{A_Fire},S_BURN26,0,0},	// S_BURN25
+    {SPR_BURN,32775,2,{A_Fire},S_BURN27,0,0},	// S_BURN26
+    {SPR_BURN,32774,2,{A_Fire},S_BURN28,0,0},	// S_BURN27
+    {SPR_BURN,32775,2,{A_Fire},S_BURN29,0,0},	// S_BURN28
+    {SPR_BURN,32774,2,{A_Fire},S_BURN30,0,0},	// S_BURN29
+    {SPR_BURN,32775,2,{A_Fire},S_NULL,0,0},	// S_BURN30
     {SPR_PUFF,1,4,{NULL},S_SMOKE2,0,0},	// S_SMOKE1
     {SPR_PUFF,2,4,{NULL},S_SMOKE3,0,0},	// S_SMOKE2
     {SPR_PUFF,1,4,{NULL},S_SMOKE4,0,0},	// S_SMOKE3
