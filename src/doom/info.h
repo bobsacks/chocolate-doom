@@ -1242,6 +1242,7 @@ typedef enum {
     MT_TROOPSHOT,
     MT_HEADSHOT,
     MT_ROCKET,
+    MT_TURRET,
     MT_PLASMA,
     MT_FLAMES,
     MT_BFG,

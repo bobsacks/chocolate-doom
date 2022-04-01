@@ -1595,11 +1595,12 @@ void A_Explode (mobj_t* thingy)
 {
     P_RadiusAttack(thingy, thingy->target, 128);
 }
-
+//Smaller raidius and damage explosion
+//Used for flamethrower burn damage-over-time
 //B_Explode
 void B_Explode (mobj_t* thingy)
 {
-    P_RadiusAttack(thingy, thingy->target, 10);
+    P_RadiusAttack(thingy, thingy->target, 20);
 }
 // Check whether the death of the specified monster type is allowed
 // to trigger the end of episode special action.

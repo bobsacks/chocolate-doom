@@ -134,7 +134,6 @@ typedef enum
     //  that is, object will float, keeping current height
     //  or changing it actively.
     MF_NOGRAVITY	= 512,
-
     // Movement flags.
     // This allows jumps from high places.
     MF_DROPOFF		= 0x400,

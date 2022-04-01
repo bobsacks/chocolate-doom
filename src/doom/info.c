@@ -72,6 +72,7 @@ void A_FireFlames();
 void A_BFGsound();
 void A_FireBFG();
 void A_BFGSpray();
+void A_TurretShoot();
 void A_Explode();
 void B_Explode();
 void A_Pain();
@@ -261,7 +262,8 @@ state_t	states[NUMSTATES] = {
     //A_StartFire
     {SPR_FLME,32771,4,{NULL},S_FLAMEXP5,0,0},	// S_FLAMEXP4
     {SPR_FLME,32772,4,{NULL},S_BURN1,0,0},	// S_PFLAMEXP5
-    {SPR_MISL,32768,1,{NULL},S_ROCKET,0,0},	// S_ROCKET
+    //Set NULL to bfgspray and it triggers every tick
+    {SPR_MISL,32768,20,{A_TurretShoot},S_ROCKET,0,0},	// S_ROCKET
     {SPR_BFS1,32768,4,{NULL},S_BFGSHOT2,0,0},	// S_BFGSHOT
     {SPR_BFS1,32769,4,{NULL},S_BFGSHOT,0,0},	// S_BFGSHOT2
     {SPR_BFE1,32768,8,{NULL},S_BFGLAND2,0,0},	// S_BFGLAND
@@ -463,7 +465,7 @@ state_t	states[NUMSTATES] = {
     {SPR_BURN,32768,2,{A_Fire},S_BURN4,0,0},	// S_BURN3
     {SPR_BURN,32769,2,{A_Fire},S_BURN5,0,0},	// S_BURN4
     {SPR_BURN,32770,2,{A_FireCrackle},S_BURN6,0,0},	// S_BURN5
-    {SPR_BURN,32769,2,{A_Fire},S_BURN7,0,0},	// S_BURN6
+    {SPR_BURN,32769,2,{B_Explode},S_BURN7,0,0},	// S_BURN6
     {SPR_BURN,32770,2,{A_Fire},S_BURN8,0,0},	// S_BURN7
     {SPR_BURN,32769,2,{A_Fire},S_BURN9,0,0},	// S_BURN8
     {SPR_BURN,32770,2,{A_Fire},S_BURN10,0,0},	// S_BURN9
@@ -2007,8 +2009,9 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL		// raisestate
     },
 
+
     {		// MT_ROCKET
-	-1,		// doomednum
+	-1,		//l
 	S_ROCKET,		// spawnstate
 	1000,		// spawnhealth
 	S_NULL,		// seestate
@@ -2023,7 +2026,32 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_EXPLODE1,		// deathstate
 	S_NULL,		// xdeathstate
 	sfx_barexp,		// deathsound
-	20*FRACUNIT,		// speed
+	20*FRACUNIT,		// speed-20
+	11*FRACUNIT,		// radius-11
+	8*FRACUNIT,		// height-8
+	100,		// mass-100
+	20,		// damage-20
+	sfx_None,		// activesound
+	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
+	S_NULL		// raisestate
+    },
+    {		// MT_TURRET
+	-1,		// doomednum
+	S_ROCKET,		// spawnstate
+	10,		// spawnhealth
+	S_NULL,		// seestate
+	sfx_rlaunc,		// seesound
+	8,		// reactiontime
+	sfx_None,		// attacksound
+	S_NULL,		// painstate
+	0,		// painchance
+	sfx_None,		// painsound
+	S_NULL,		// meleestate
+	S_NULL,		// missilestate
+	S_EXPLODE1,		// deathstate
+	S_NULL,		// xdeathstate
+	sfx_barexp,		// deathsound
+	.5*FRACUNIT,		// speed
 	11*FRACUNIT,		// radius
 	8*FRACUNIT,		// height
 	100,		// mass
@@ -2032,7 +2060,6 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
 	S_NULL		// raisestate
     },
-
     {		// MT_PLASMA
 	-1,		// doomednum
 	S_PLASBALL,		// spawnstate

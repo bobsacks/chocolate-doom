@@ -509,10 +509,15 @@ A_Saw
     if (!linetarget)
     {
 	S_StartSound (player->mo, sfx_sawful);
+    //damages player when target attempt is made
+    //P_DamageMobj (player->mo, NULL, NULL, 20);
 	return;
     }
     S_StartSound (player->mo, sfx_sawhit);
-	
+    //Gives Player Health equal to damage dealt	
+    //P_GiveBody(player, damage >> 1);
+    //Damages the player when attack hits
+    //P_DamageMobj (player->mo, NULL, NULL, 20);
     // turn to face target
     angle = R_PointToAngle2 (player->mo->x, player->mo->y,
 			     linetarget->x, linetarget->y);
@@ -561,10 +566,44 @@ A_FireMissile
   pspdef_t*	psp ) 
 {
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
-    P_SpawnPlayerMissile (player->mo, MT_ROCKET);
+//    P_SpawnPlayerMissile (player->mo, MT_ROCKET);
+    P_SpawnPlayerMissile (player->mo, MT_TURRET);
 }
 
 
+void A_TurretShoot (mobj_t* mo) 
+{
+    int			i;
+    int			j;
+    int			damage;
+    angle_t		an;
+	
+    // offset angles from its attack angle
+    for (i=0 ; i<40 ; i++)
+    {
+	an = mo->angle - ANG90/2 + ANG90/40*i;
+
+	// mo->target is the originator (player)
+	//  of the missile
+	P_AimLineAttack (mo->target, an, 16*64*FRACUNIT);
+
+	if (!linetarget)
+	    continue;
+
+	P_SpawnMobj (linetarget->x,
+		     linetarget->y,
+		     linetarget->z + (linetarget->height>>2),
+		     MT_EXTRABFG);
+	
+    //damages everything in site for 1 damage every # of tics declared in info.c
+	damage = 1;
+	//for (j=0;j<1;j++)
+	    //damage += (P_Random()&2) + 1;
+        //damage = 1;
+
+	P_DamageMobj (linetarget, mo->target,mo->target, damage);
+    }
+}
 //
 // A_FireBFG
 //
@@ -778,6 +817,8 @@ A_FireCGun
     P_BulletSlope (player->mo);
 	
     P_GunShot (player->mo, !player->refire);
+    
+    
 }
 
 
@@ -836,6 +877,7 @@ void A_BFGSpray (mobj_t* mo)
 	P_DamageMobj (linetarget, mo->target,mo->target, damage);
     }
 }
+
 
 
 //
