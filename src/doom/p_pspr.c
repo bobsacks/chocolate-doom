@@ -637,6 +637,21 @@ A_FireMissile
 
 
 //
+// A_FireTurret
+//
+void
+A_FireTurret
+( mobj_t*	mobj,
+  player_t*	player,
+  pspdef_t*	psp ) 
+{
+    if (!player) return; // [crispy] let pspr action pointers get called from mobj states
+    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+    P_SpawnPlayerMissile (player->mo, MT_TURRET);
+}
+
+
+//
 // A_FireBFG
 //
 void
@@ -672,6 +687,25 @@ A_FirePlasma
     P_SpawnPlayerMissile (player->mo, MT_PLASMA);
 }
 
+
+//
+// A_FireFlames
+//
+void
+A_FireFlames
+( mobj_t*	mobj,
+  player_t*	player,
+  pspdef_t*	psp ) 
+{
+    if (!player) return; // [crispy] let pspr action pointers get called from mobj states
+    DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
+
+    P_SetPsprite (player,
+		  ps_flash,
+		  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
+
+    P_SpawnPlayerMissile (player->mo, MT_FLAMES);
+}
 
 
 //

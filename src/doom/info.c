@@ -32,7 +32,7 @@
 const char *sprnames[] = {
     "TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
     "MISF","SAWG","PLSG","PLSF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
-    "PLSS","PLSE","MISL","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
+    "PLSS","PLSE","MISL","SENT","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
     "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
     "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
     "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","FCAN",
@@ -84,6 +84,7 @@ void A_GunFlash();
 void A_FireMissile();
 void A_Saw();
 void A_FirePlasma();
+void A_FireFlames();
 void A_BFGsound();
 void A_FireBFG();
 void A_BFGSpray();
@@ -266,6 +267,7 @@ state_t	states[NUMSTATES] = {
     {SPR_PLSE,32771,4,{NULL},S_PLASEXP5,0,0},	// S_PLASEXP4
     {SPR_PLSE,32772,4,{NULL},S_NULL,0,0},	// S_PLASEXP5
     {SPR_MISL,32768,1,{NULL},S_ROCKET,0,0},	// S_ROCKET
+    {SPR_SENT,32768,1,{NULL},S_TURRET,0,0},	// S_ROCKET
     {SPR_BFS1,32768,4,{NULL},S_BFGSHOT2,0,0},	// S_BFGSHOT
     {SPR_BFS1,32769,4,{NULL},S_BFGSHOT,0,0},	// S_BFGSHOT2
     {SPR_BFE1,32768,8,{NULL},S_BFGLAND2,0,0},	// S_BFGLAND
@@ -2090,6 +2092,32 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL		// raisestate
     },
 
+    {		// MT_TURRET
+	-1,		// doomednum
+	S_TURRET,		// spawnstate
+	1000,		// spawnhealth
+	S_NULL,		// seestate
+	sfx_rlaunc,		// seesound
+	8,		// reactiontime
+	sfx_None,		// attacksound
+	S_NULL,		// painstate
+	0,		// painchance
+	sfx_None,		// painsound
+	S_NULL,		// meleestate
+	S_NULL,		// missilestate
+	S_EXPLODE1,		// deathstate
+	S_NULL,		// xdeathstate
+	sfx_barexp,		// deathsound
+	20*FRACUNIT,		// speed
+	11*FRACUNIT,		// radius
+	8*FRACUNIT,		// height
+	100,		// mass
+	20,		// damage
+	sfx_None,		// activesound
+	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
+	S_NULL		// raisestate
+    },
+
     {		// MT_PLASMA
 	-1,		// doomednum
 	S_PLASBALL,		// spawnstate
@@ -2107,6 +2135,32 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL,		// xdeathstate
 	sfx_firxpl,		// deathsound
 	25*FRACUNIT,		// speed
+	13*FRACUNIT,		// radius
+	8*FRACUNIT,		// height
+	100,		// mass
+	5,		// damage
+	sfx_None,		// activesound
+	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY|MF_TRANSLUCENT,		// flags
+	S_NULL		// raisestate
+    },
+
+    {		// MT_FLAMES
+	-1,		// doomednum
+	S_PLASBALL,		// spawnstate
+	1000,		// spawnhealth
+	S_NULL,		// seestate
+	sfx_plasma,		// seesound
+	8,		// reactiontime
+	sfx_None,		// attacksound
+	S_NULL,		// painstate
+	0,		// painchance
+	sfx_None,		// painsound
+	S_NULL,		// meleestate
+	S_NULL,		// missilestate
+	S_PLASEXP,		// deathstate
+	S_NULL,		// xdeathstate
+	sfx_firxpl,		// deathsound
+	1*FRACUNIT,		// speed - 25
 	13*FRACUNIT,		// radius
 	8*FRACUNIT,		// height
 	100,		// mass
