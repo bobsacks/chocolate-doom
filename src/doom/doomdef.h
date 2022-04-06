@@ -111,10 +111,10 @@ typedef enum
     wp_chaingun,
     wp_missile,
     wp_plasma,
-    wp_flames,
     wp_bfg,
     wp_chainsaw,
     wp_supershotgun,
+    wp_flames,
 
     NUMWEAPONS,
     

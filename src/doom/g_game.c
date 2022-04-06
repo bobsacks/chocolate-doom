@@ -196,7 +196,7 @@ static const struct
     { wp_chaingun,        wp_chaingun },
     { wp_missile,         wp_missile },
     { wp_plasma,          wp_plasma },
-    { wp_flames,          wp_flames },
+    { wp_flames,          wp_plasma },
     { wp_bfg,             wp_bfg }
 };
 
