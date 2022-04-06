@@ -31,8 +31,8 @@
 
 const char *sprnames[] = {
     "TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
-    "MISF","SAWG","PLSG","PLSF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
-    "PLSS","PLSE","MISL","SENT","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
+    "MISF","SAWG","PLSG","PLSF","FLAG","FLAF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
+    "PLSS","PLSE","FLAS","FLAE","MISL","SENT","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
     "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
     "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
     "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","FCAN",
@@ -233,6 +233,15 @@ state_t	states[NUMSTATES] = {
     {SPR_PLSG,1,20,{A_ReFire},S_PLASMA,0,0},	// S_PLASMA2
     {SPR_PLSF,32768,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH1
     {SPR_PLSF,32769,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH2
+//WWDADD
+    {SPR_FLAG,0,1,{A_WeaponReady},S_PLASMA,0,0},	// S_PLASMA
+    {SPR_FLAG,0,1,{A_Lower},S_PLASMADOWN,0,0},	// S_PLASMADOWN
+    {SPR_FLAG,0,1,{A_Raise},S_PLASMAUP,0,0},	// S_PLASMAUP
+    {SPR_FLAG,0,3,{A_FirePlasma},S_PLASMA2,0,0},	// S_PLASMA1
+    {SPR_FLAG,1,20,{A_ReFire},S_PLASMA,0,0},	// S_PLASMA2
+    {SPR_FLAF,32768,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH1
+    {SPR_FLAF,32769,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH2
+//WWDEND
     {SPR_BFGG,0,1,{A_WeaponReady},S_BFG,0,0},	// S_BFG
     {SPR_BFGG,0,1,{A_Lower},S_BFGDOWN,0,0},	// S_BFGDOWN
     {SPR_BFGG,0,1,{A_Raise},S_BFGUP,0,0},	// S_BFGUP
@@ -266,6 +275,15 @@ state_t	states[NUMSTATES] = {
     {SPR_PLSE,32770,4,{NULL},S_PLASEXP4,0,0},	// S_PLASEXP3
     {SPR_PLSE,32771,4,{NULL},S_PLASEXP5,0,0},	// S_PLASEXP4
     {SPR_PLSE,32772,4,{NULL},S_NULL,0,0},	// S_PLASEXP5
+    //WWDADD
+    {SPR_FLAS,32768,6,{NULL},S_FLAMBALL2,0,0},	// S_FLAMBALL
+    {SPR_FLAS,32769,6,{NULL},S_FLAMBALL,0,0},	// S_FLAMBALL2
+    {SPR_FLAE,32768,4,{NULL},S_FLAMEXP2,0,0},	// S_FLAMEXP
+    {SPR_FLAE,32769,4,{NULL},S_FLAMEXP3,0,0},	// S_FLAMEXP2
+    {SPR_FLAE,32770,4,{NULL},S_FLAMEXP4,0,0},	// S_FLAMEXP3
+    {SPR_FLAE,32771,4,{NULL},S_FLAMEXP5,0,0},	// S_FLAMEXP4
+    {SPR_FLAE,32772,4,{NULL},S_NULL,0,0},	// S_FLAMEXP
+    //WWDEND
     {SPR_MISL,32768,1,{NULL},S_ROCKET,0,0},	// S_ROCKET
     {SPR_SENT,32768,1,{NULL},S_TURRET,0,0},	// S_ROCKET
     {SPR_BFS1,32768,4,{NULL},S_BFGSHOT2,0,0},	// S_BFGSHOT
@@ -2146,7 +2164,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 
     {		// MT_FLAMES
 	-1,		// doomednum
-	S_PLASBALL,		// spawnstate
+	S_FLAMBALL,		// spawnstate
 	1000,		// spawnhealth
 	S_NULL,		// seestate
 	sfx_plasma,		// seesound
@@ -2157,7 +2175,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	sfx_None,		// painsound
 	S_NULL,		// meleestate
 	S_NULL,		// missilestate
-	S_PLASEXP,		// deathstate
+	S_FLAMEXP,		// deathstate
 	S_NULL,		// xdeathstate
 	sfx_firxpl,		// deathsound
 	1*FRACUNIT,		// speed - 25

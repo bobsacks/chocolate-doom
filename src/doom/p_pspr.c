@@ -684,7 +684,7 @@ A_FirePlasma
 		  ps_flash,
 		  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
 
-    P_SpawnPlayerMissile (player->mo, MT_PLASMA);
+    P_SpawnPlayerMissile (player->mo, MT_FLAMES);
 }
 
 
