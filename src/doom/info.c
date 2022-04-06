@@ -35,7 +35,7 @@ const char *sprnames[] = {
     "PLSS","PLSE","FLAS","FLAE","MISL","SENT","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
     "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
     "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
-    "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","FCAN",
+    "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","SPEW","FCAN",
     "BON1","BON2","BKEY","RKEY","YKEY","BSKU","RSKU","YSKU","STIM","MEDI",
     "SOUL","PINV","PSTR","PINS","MEGA","SUIT","PMAP","PVIS","CLIP","AMMO",
     "ROCK","BROK","CELL","CELP","SHEL","SBOX","BPAK","BFUG","MGUN","CSAW",
@@ -987,6 +987,16 @@ state_t	states[NUMSTATES] = {
     {SPR_BEXP,32770,5,{NULL},S_BEXP4,0,0},	// S_BEXP3
     {SPR_BEXP,32771,10,{A_Explode},S_BEXP5,0,0},	// S_BEXP4
     {SPR_BEXP,32772,10,{NULL},S_NULL,0,0},	// S_BEXP5
+    //WWD-ADD-SPEW 
+    {SPR_SPEW,32768,5,{NULL},S_SPEW2,0,0},	// S_SPEW
+    {SPR_SPEW,32769,5,{NULL},S_SPEW3,0,0},	// S_SPEW2
+    {SPR_SPEW,32770,5,{NULL},S_SPEW4,0,0},	// S_SPEW3
+    {SPR_SPEW,32771,10,{NULL},S_SPEW5,0,0},	// S_SPEW4
+    {SPR_SPEW,32772,10,{NULL},S_SPEW6,0,0},	// S_SPEW5
+    {SPR_SPEW,32773,10,{NULL},S_SPEW7,0,0},	// S_SPEW5
+    {SPR_SPEW,32774,10,{NULL},S_SPEW8,0,0},	// S_SPEW5
+    {SPR_SPEW,32775,10,{NULL},S_NULL,0,0},	// S_SPEW5
+    //WWD-END
     {SPR_FCAN,32768,4,{NULL},S_BBAR2,0,0},	// S_BBAR1
     {SPR_FCAN,32769,4,{NULL},S_BBAR3,0,0},	// S_BBAR2
     {SPR_FCAN,32770,4,{NULL},S_BBAR1,0,0},	// S_BBAR3
@@ -2175,10 +2185,11 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	sfx_None,		// painsound
 	S_NULL,		// meleestate
 	S_NULL,		// missilestate
-	S_FLAMEXP,		// deathstate
-	S_NULL,		// xdeathstate
+    S_FLAMEXP,		// deathstate
+    //S_SPEW,	
+    S_NULL,		// xdeathstate
 	sfx_firxpl,		// deathsound
-	1*FRACUNIT,		// speed - 25
+	25*FRACUNIT,		// speed - 25
 	13*FRACUNIT,		// radius
 	8*FRACUNIT,		// height
 	100,		// mass

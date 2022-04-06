@@ -419,7 +419,7 @@ void P_PlayerThink (player_t* player)
     //wwdadd
 	if ( newweapon == wp_plasma 
 	    && player->weaponowned[wp_flames]
-	    && player->readyweapon != wp_flames)
+	    && player->readyweapon == wp_plasma)
 	{
 	    newweapon = wp_flames;
 	}

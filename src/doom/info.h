@@ -90,6 +90,9 @@ typedef enum
     SPR_ARM2,
     SPR_BAR1,
     SPR_BEXP,
+    //WWD-ADD SPEW
+    SPR_SPEW,
+    //WWD-END
     SPR_FCAN,
     SPR_BON1,
     SPR_BON2,
@@ -1027,6 +1030,16 @@ typedef enum
     S_BEXP3,
     S_BEXP4,
     S_BEXP5,
+    //WWD-ADD
+    S_SPEW,
+    S_SPEW2,
+    S_SPEW3,
+    S_SPEW4,
+    S_SPEW5,  
+    S_SPEW6,  
+    S_SPEW7,  
+    S_SPEW8,   
+    //WWD-END
     S_BBAR1,
     S_BBAR2,
     S_BBAR3,
