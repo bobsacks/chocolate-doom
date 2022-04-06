@@ -91,6 +91,15 @@ weaponinfo_t	weaponinfo[NUMWEAPONS] =
 	S_PLASMAFLASH1
     },
     {
+    // flame thrower
+    am_cell,
+	S_FLAMESUP,
+	S_FLAMESDOWN,
+	S_FLAMES,
+	S_FLAMES1,
+	S_FLAMESFLASH1
+    },
+    {
 	// bfg 9000
 	am_cell,
 	S_BFGUP,
