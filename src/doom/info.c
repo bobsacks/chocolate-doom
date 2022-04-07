@@ -31,11 +31,22 @@
 
 const char *sprnames[] = {
     "TROO","SHTG","PUNG","PISG","PISF","SHTF","SHT2","CHGG","CHGF","MISG",
-    "MISF","SAWG","PLSG","PLSF","FLAG","FLAF","BFGG","BFGF","BLUD","PUFF","BAL1","BAL2",
-    "PLSS","PLSE","FLAS","FLAE","MISL","SENT","BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
+    "MISF","SAWG","PLSG","PLSF",
+    //Custom Plasma Gun    
+    "FLAG","FLAF", 
+    "BFGG","BFGF","BLUD","PUFF","BAL1","BAL2","PLSS","PLSE",
+    //Custom Plasma Ball and Explosion
+    "FLAS","FLAE",
+    "MISL",
+    //Custom Rocket
+    "SENT","ACID",
+    "BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
     "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
     "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
-    "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP","SPEW","FCAN",
+    "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP",
+    //Custom Barrell
+    "SPEW",
+    "FCAN",
     "BON1","BON2","BKEY","RKEY","YKEY","BSKU","RSKU","YSKU","STIM","MEDI",
     "SOUL","PINV","PSTR","PINS","MEGA","SUIT","PMAP","PVIS","CLIP","AMMO",
     "ROCK","BROK","CELL","CELP","SHEL","SBOX","BPAK","BFUG","MGUN","CSAW",
@@ -84,11 +95,14 @@ void A_GunFlash();
 void A_FireMissile();
 void A_Saw();
 void A_FirePlasma();
+//Custom Plasma Gun
 void A_FireFlames();
 void A_BFGsound();
 void A_FireBFG();
 void A_BFGSpray();
 void A_Explode();
+//WWD-ADD - Custom Explode
+void A_Axplode();
 void A_Pain();
 void A_PlayerScream();
 void A_Fall();
@@ -233,7 +247,7 @@ state_t	states[NUMSTATES] = {
     {SPR_PLSG,1,20,{A_ReFire},S_PLASMA,0,0},	// S_PLASMA2
     {SPR_PLSF,32768,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH1
     {SPR_PLSF,32769,4,{A_Light1},S_LIGHTDONE,0,0},	// S_PLASMAFLASH2
-//WWDADD
+    //WWDADD - Custom Plasma Gun
     {SPR_FLAG,0,1,{A_WeaponReady},S_FLAMES,0,0},	// S_FLAMES
     {SPR_FLAG,0,1,{A_Lower},S_FLAMESDOWN,0,0},	// S_FLAMESDOWN
     {SPR_FLAG,0,1,{A_Raise},S_FLAMESUP,0,0},	// S_FLAMESUP
@@ -241,7 +255,7 @@ state_t	states[NUMSTATES] = {
     {SPR_FLAG,1,20,{A_ReFire},S_FLAMES,0,0},	// S_FLAMES2
     {SPR_FLAF,32768,4,{A_Light1},S_LIGHTDONE,0,0},	// S_FLAMESFLASH1
     {SPR_FLAF,32769,4,{A_Light1},S_LIGHTDONE,0,0},	// S_FLAMESFLASH2
-//WWDEND
+    //WWDEND
     {SPR_BFGG,0,1,{A_WeaponReady},S_BFG,0,0},	// S_BFG
     {SPR_BFGG,0,1,{A_Lower},S_BFGDOWN,0,0},	// S_BFGDOWN
     {SPR_BFGG,0,1,{A_Raise},S_BFGUP,0,0},	// S_BFGUP
@@ -275,7 +289,7 @@ state_t	states[NUMSTATES] = {
     {SPR_PLSE,32770,4,{NULL},S_PLASEXP4,0,0},	// S_PLASEXP3
     {SPR_PLSE,32771,4,{NULL},S_PLASEXP5,0,0},	// S_PLASEXP4
     {SPR_PLSE,32772,4,{NULL},S_NULL,0,0},	// S_PLASEXP5
-    //WWDADD
+    //WWDADD - Custom Plasma Projectile and Explosion
     {SPR_FLAS,32768,6,{NULL},S_FLAMBALL2,0,0},	// S_FLAMBALL
     {SPR_FLAS,32769,6,{NULL},S_FLAMBALL,0,0},	// S_FLAMBALL2
     {SPR_FLAE,32768,4,{NULL},S_FLAMEXP2,0,0},	// S_FLAMEXP
@@ -285,7 +299,8 @@ state_t	states[NUMSTATES] = {
     {SPR_FLAE,32772,4,{NULL},S_NULL,0,0},	// S_FLAMEXP
     //WWDEND
     {SPR_MISL,32768,1,{NULL},S_ROCKET,0,0},	// S_ROCKET
-    {SPR_SENT,32768,1,{NULL},S_TURRET,0,0},	// S_ROCKET
+    {SPR_SENT,32768,1,{NULL},S_TURRET,0,0},	// S_ROCKET - WWD
+    {SPR_ACID,32768,1,{NULL},S_ACID,0,0},	// S_ROCKET - WWD
     {SPR_BFS1,32768,4,{NULL},S_BFGSHOT2,0,0},	// S_BFGSHOT
     {SPR_BFS1,32769,4,{NULL},S_BFGSHOT,0,0},	// S_BFGSHOT2
     {SPR_BFE1,32768,8,{NULL},S_BFGLAND2,0,0},	// S_BFGLAND
@@ -301,6 +316,9 @@ state_t	states[NUMSTATES] = {
     {SPR_MISL,32769,8,{A_Explode},S_EXPLODE2,0,0},	// S_EXPLODE1
     {SPR_MISL,32770,6,{NULL},S_EXPLODE3,0,0},	// S_EXPLODE2
     {SPR_MISL,32771,4,{NULL},S_NULL,0,0},	// S_EXPLODE3
+    {SPR_ACID,32769,8,{A_Axplode},S_AXPLODE2,0,0},	// S_EXPLODE1
+    {SPR_ACID,32770,6,{NULL},S_AXPLODE3,0,0},	// S_EXPLODE2
+    {SPR_ACID,32771,4,{NULL},S_NULL,0,0},	// S
     {SPR_TFOG,32768,6,{NULL},S_TFOG01,0,0},	// S_TFOG
     {SPR_TFOG,32769,6,{NULL},S_TFOG02,0,0},	// S_TFOG01
     {SPR_TFOG,32768,6,{NULL},S_TFOG2,0,0},	// S_TFOG02
@@ -2119,7 +2137,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
 	S_NULL		// raisestate
     },
-
+    //WWD - Custom Rocket
     {		// MT_TURRET
 	-1,		// doomednum
 	S_TURRET,		// spawnstate
@@ -2145,7 +2163,31 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
 	S_NULL		// raisestate
     },
-
+    {		// MT_ACID
+	-1,		// doomednum
+	S_ACID,		// spawnstate
+	1000,		// spawnhealth
+	S_NULL,		// seestate
+	sfx_rlaunc,		// seesound
+	8,		// reactiontime
+	sfx_None,		// attacksound
+	S_NULL,		// painstate
+	0,		// painchance
+	sfx_None,		// painsound
+	S_NULL,		// meleestate
+	S_NULL,		// missilestate
+	S_AXPLODE1,		// deathstate
+	S_NULL,		// xdeathstate
+	sfx_barexp,		// deathsound
+	20*FRACUNIT,		// speed
+	11*FRACUNIT,		// radius
+	8*FRACUNIT,		// height
+	100,		// mass
+	20,		// damage
+	sfx_None,		// activesound
+	MF_NOBLOCKMAP|MF_MISSILE|MF_DROPOFF|MF_NOGRAVITY,		// flags
+	S_NULL		// raisestate
+    },
     {		// MT_PLASMA
 	-1,		// doomednum
 	S_PLASBALL,		// spawnstate
@@ -2172,6 +2214,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	S_NULL		// raisestate
     },
 
+    //Custom Plasma Guns
     {		// MT_FLAMES
 	-1,		// doomednum
 	S_FLAMBALL,		// spawnstate

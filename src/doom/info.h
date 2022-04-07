@@ -54,6 +54,7 @@ typedef enum
     SPR_FLAE,
     SPR_MISL,
     SPR_SENT,
+    SPR_ACID,
     SPR_BFS1,
     SPR_BFE1,
     SPR_BFE2,
@@ -281,6 +282,7 @@ typedef enum
     S_PLASMA2,
     S_PLASMAFLASH1,
     S_PLASMAFLASH2,
+    //Custom Plasma Gun
     S_FLAMES,
     S_FLAMESDOWN,
     S_FLAMESUP,
@@ -321,7 +323,7 @@ typedef enum
     S_PLASEXP3,
     S_PLASEXP4,
     S_PLASEXP5,
-    //WWDADD
+    //WWDADD - Custom Plasma Projectile
     S_FLAMBALL,
     S_FLAMBALL2,
     S_FLAMEXP,
@@ -331,7 +333,10 @@ typedef enum
     S_FLAMEXP5,
     //WWDEND
     S_ROCKET,
+    //WWDADD - Custom Rocket
     S_TURRET,
+    S_ACID,    
+    //WWDEND
     S_BFGSHOT,
     S_BFGSHOT2,
     S_BFGLAND,
@@ -347,6 +352,9 @@ typedef enum
     S_EXPLODE1,
     S_EXPLODE2,
     S_EXPLODE3,
+    S_AXPLODE1,
+    S_AXPLODE2,
+    S_AXPLODE3,
     S_TFOG,
     S_TFOG01,
     S_TFOG02,
@@ -1333,8 +1341,11 @@ typedef enum {
     MT_TROOPSHOT,
     MT_HEADSHOT,
     MT_ROCKET,
+    //WWD - Custom Rockets
     MT_TURRET,
+    MT_ACID,
     MT_PLASMA,
+    //WWD - Custom Plasma Gun
     MT_FLAMES,
     MT_BFG,
     MT_ARACHPLAZ,
@@ -1444,6 +1455,7 @@ typedef enum {
     MT_DOGS,
     MT_PLASMA1,
     MT_PLASMA2,
+    //Custom Plasma Projectile
     MT_FLAMES1,
     MT_FLAMES2,
     MT_SCEPTRE,

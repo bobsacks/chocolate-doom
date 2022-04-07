@@ -833,6 +833,9 @@ void A_PosAttack (mobj_t* actor)
     angle += P_SubRandom() << 20;
     damage = ((P_Random()%5)+1)*3;
     P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
+    //S_SPEW;
+    //WWD-ADD - This makes the enemy shoot a missile. Can use to make new enemie.    
+    //P_SpawnMissile (actor, actor->target, MT_TROOPSHOT);
 }
 
 void A_SPosAttack (mobj_t* actor)
@@ -1662,6 +1665,14 @@ void A_Fall (mobj_t *actor)
 // A_Explode
 //
 void A_Explode (mobj_t* thingy)
+{
+    P_RadiusAttack(thingy, thingy->target, 128);
+}
+
+//
+// A_Axplode
+//
+void A_Axplode (mobj_t* thingy)
 {
     P_RadiusAttack(thingy, thingy->target, 128);
 }

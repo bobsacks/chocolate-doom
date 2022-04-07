@@ -632,7 +632,7 @@ A_FireMissile
 {
     if (!player) return; // [crispy] let pspr action pointers get called from mobj states
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
-    P_SpawnPlayerMissile (player->mo, MT_ROCKET);
+    P_SpawnPlayerMissile (player->mo, MT_ACID);
 }
 
 
@@ -690,7 +690,7 @@ A_FirePlasma
 
 //
 // A_FireFlames
-//
+// WWD - Custom Plasma Projectiles
 void
 A_FireFlames
 ( mobj_t*	mobj,
