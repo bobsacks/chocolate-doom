@@ -821,6 +821,10 @@ void A_PosAttack (mobj_t* actor)
     int		angle;
     int		damage;
     int		slope;
+    mobj_t*	newmobj;
+    fixed_t x;
+    fixed_t y;
+    fixed_t z;
 	
     if (!actor->target)
 	return;
@@ -833,9 +837,24 @@ void A_PosAttack (mobj_t* actor)
     angle += P_SubRandom() << 20;
     damage = ((P_Random()%5)+1)*3;
     P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
+    //newmobj = P_SpawnMissile (mo, targ, MT_SPAWNSHOT)
+   // newmobj	= P_SpawnMobj (targ->x, targ->y, targ->z, MT_TROOP);
     //S_SPEW;
     //WWD-ADD - This makes the enemy shoot a missile. Can use to make new enemie.    
     //P_SpawnMissile (actor, actor->target, MT_TROOPSHOT);
+    //P_SpawnMobj (0,0,0,MT_TROOP);
+    x= (actor->x-actor->momx)+7*(((P_Random()%15)+7))*FRACUNIT;
+    y= (actor->y-actor->momy)+7*(((P_Random()%15)+7))*FRACUNIT;
+    z= actor->z;
+    newmobj	= P_SpawnMobj (x,y,z, MT_SKULL);
+    
+    //if (P_LookForPlayers (newmobj, true) )
+	P_SetMobjState (newmobj, newmobj->info->seestate);
+	
+    // telefrag anything in this spot
+    P_TeleportMove (newmobj, newmobj->x, newmobj->y);
+    //P_RemoveMobj (actor);
+
 }
 
 void A_SPosAttack (mobj_t* actor)
@@ -1519,9 +1538,9 @@ A_PainShootSkull
 ( mobj_t*	actor,
   angle_t	angle )
 {
-    fixed_t	x;
-    fixed_t	y;
-    fixed_t	z;
+    fixed_t x;
+    fixed_t y;
+    fixed_t z;
     
     mobj_t*	newmobj;
     angle_t	an;
