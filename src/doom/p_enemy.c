@@ -837,23 +837,89 @@ void A_PosAttack (mobj_t* actor)
     angle += P_SubRandom() << 20;
     damage = ((P_Random()%5)+1)*3;
     P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
+
     //newmobj = P_SpawnMissile (mo, targ, MT_SPAWNSHOT)
-   // newmobj	= P_SpawnMobj (targ->x, targ->y, targ->z, MT_TROOP);
     //S_SPEW;
+
     //WWD-ADD - This makes the enemy shoot a missile. Can use to make new enemie.    
     //P_SpawnMissile (actor, actor->target, MT_TROOPSHOT);
     //P_SpawnMobj (0,0,0,MT_TROOP);
-    x= (actor->x-actor->momx)+7*(((P_Random()%15)+7))*FRACUNIT;
-    y= (actor->y-actor->momy)+7*(((P_Random()%15)+7))*FRACUNIT;
+    x= (actor->x);
+    y= (actor->y);
     z= actor->z;
-    newmobj	= P_SpawnMobj (x,y,z, MT_SKULL);
+
+    //x= (actor->x-actor->momx)+7*(((P_Random()%15)+7))*FRACUNIT;
+    //y= (actor->y-actor->momy)+7*(((P_Random()%15)+7))*FRACUNIT;
+    //z= actor->z;
+    //P_RemoveMobj (actor);
+
+
+    //when the poss zombie shoots, it is gibbed and spawns a skull
+    //*newmobj	= P_SpawnMobj (x,y,z, MT_SKULL);
+    //*P_DamageMobj (actor, actor, actor, 10000);
+    // telefrag anything in this spot
+    //*P_TeleportMove (newmobj, actor->x, actor->y);
     
     //if (P_LookForPlayers (newmobj, true) )
-	P_SetMobjState (newmobj, newmobj->info->seestate);
+	//P_SetMobjState (newmobj, newmobj->info->seestate);
+
+
+
+
+}
+
+//
+// B_PosAttack
+//
+void B_PosAttack (mobj_t* actor)
+{
+    int		angle;
+    int		damage;
+    int		slope;
+    mobj_t*	newmobj;
+    fixed_t x;
+    fixed_t y;
+    fixed_t z;
 	
-    // telefrag anything in this spot
-    P_TeleportMove (newmobj, newmobj->x, newmobj->y);
+    if (!actor->target)
+	return;
+		
+    A_FaceTarget (actor);
+    angle = actor->angle;
+    slope = P_AimLineAttack (actor, angle, MISSILERANGE);
+
+    S_StartSound (actor, sfx_pistol);
+    angle += P_SubRandom() << 20;
+    damage = ((P_Random()%5)+1)*3;
+    P_LineAttack (actor, angle, MISSILERANGE, slope, damage);
+
+    //newmobj = P_SpawnMissile (mo, targ, MT_SPAWNSHOT)
+    //S_SPEW;
+
+    //WWD-ADD - This makes the enemy shoot a missile. Can use to make new enemie.    
+    //P_SpawnMissile (actor, actor->target, MT_TROOPSHOT);
+    //P_SpawnMobj (0,0,0,MT_TROOP);
+    x= (actor->x);
+    y= (actor->y);
+    z= actor->z;
+
+    //x= (actor->x-actor->momx)+7*(((P_Random()%15)+7))*FRACUNIT;
+    //y= (actor->y-actor->momy)+7*(((P_Random()%15)+7))*FRACUNIT;
+    //z= actor->z;
     //P_RemoveMobj (actor);
+
+
+    //when the poss zombie shoots, it is gibbed and spawns a skull
+    //*newmobj	= P_SpawnMobj (x,y,z, MT_SKULL);
+    //*P_DamageMobj (actor, actor, actor, 10000);
+    // telefrag anything in this spot
+    //*P_TeleportMove (newmobj, actor->x, actor->y);
+    
+    //if (P_LookForPlayers (newmobj, true) )
+	//P_SetMobjState (newmobj, newmobj->info->seestate);
+
+
+
 
 }
 

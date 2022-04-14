@@ -41,6 +41,7 @@ const char *sprnames[] = {
     //Custom Rocket
     "SENT","ACID",
     "BFS1","BFE1","BFE2","TFOG","IFOG","PLAY","POSS",
+    "GOSS",
     "SPOS","VILE","FIRE","FATB","FBXP","SKEL","MANF","FATT","CPOS","SARG",
     "HEAD","BAL7","BOSS","BOS2","SKUL","SPID","BSPI","APLS","APBX","CYBR",
     "PAIN","SSWV","KEEN","BBRN","BOSF","ARM1","ARM2","BAR1","BEXP",
@@ -112,6 +113,8 @@ void A_Chase();
 void A_FaceTarget();
 void A_PosAttack();
 void A_Scream();
+void B_PosAttack();
+void B_Scream();
 void A_SPosAttack();
 void A_VileChase();
 void A_VileStart();
@@ -160,7 +163,7 @@ void A_FireOldBFG();
 void A_Detonate();
 void A_Mushroom();
 void A_BetaSkullAttack();
-
+int wwd=0;
 
 state_t	states[NUMSTATES] = {
     {SPR_TROO,0,-1,{NULL},S_NULL,0,0},	// S_NULL
@@ -383,7 +386,7 @@ state_t	states[NUMSTATES] = {
     {SPR_POSS,8,5,{A_Scream},S_POSS_DIE3,0,0},	// S_POSS_DIE2
     {SPR_POSS,9,5,{A_Fall},S_POSS_DIE4,0,0},	// S_POSS_DIE3
     {SPR_POSS,10,5,{NULL},S_POSS_DIE5,0,0},	// S_POSS_DIE4
-    {SPR_POSS,11,-1,{NULL},S_NULL,0,0},	// S_POSS_DIE5
+    {SPR_POSS,11,-1,{NULL},S_NULL,0,0},	// S_POSS_DIE5//-1
     {SPR_POSS,12,5,{NULL},S_POSS_XDIE2,0,0},	// S_POSS_XDIE1
     {SPR_POSS,13,5,{A_XScream},S_POSS_XDIE3,0,0},	// S_POSS_XDIE2
     {SPR_POSS,14,5,{A_Fall},S_POSS_XDIE4,0,0},	// S_POSS_XDIE3
@@ -397,6 +400,39 @@ state_t	states[NUMSTATES] = {
     {SPR_POSS,9,5,{NULL},S_POSS_RAISE3,0,0},	// S_POSS_RAISE2
     {SPR_POSS,8,5,{NULL},S_POSS_RAISE4,0,0},	// S_POSS_RAISE3
     {SPR_POSS,7,5,{NULL},S_POSS_RUN1,0,0},	// S_POSS_RAISE4
+    {SPR_GOSS,1,10,{A_Look},S_GOSS_STND,0,0},	// S_GOSS_STND2
+    {SPR_GOSS,0,4,{A_Chase},S_GOSS_RUN2,0,0},	// S_GOSS_RUN1
+    {SPR_GOSS,0,4,{A_Chase},S_GOSS_RUN3,0,0},	// S_GOSS_RUN2
+    {SPR_GOSS,1,4,{A_Chase},S_GOSS_RUN4,0,0},	// S_GOSS_RUN3
+    {SPR_GOSS,1,4,{A_Chase},S_GOSS_RUN5,0,0},	// S_GOSS_RUN4
+    {SPR_GOSS,2,4,{A_Chase},S_GOSS_RUN6,0,0},	// S_GOSS_RUN5
+    {SPR_GOSS,2,4,{A_Chase},S_GOSS_RUN7,0,0},	// S_GOSS_RUN6
+    {SPR_GOSS,3,4,{A_Chase},S_GOSS_RUN8,0,0},	// S_GOSS_RUN7
+    {SPR_GOSS,3,4,{A_Chase},S_GOSS_RUN1,0,0},	// S_GOSS_RUN8
+    {SPR_GOSS,4,10,{A_FaceTarget},S_GOSS_ATK2,0,0},	// S_GOSS_ATK1
+    // [crispy] render Zombiman's firing frames full-bright
+    {SPR_GOSS,5|0x8000,8,{B_PosAttack},S_GOSS_ATK3,0,0},	// S_GOSS_ATK2
+    {SPR_GOSS,4,8,{NULL},S_GOSS_RUN1,0,0},	// S_GOSS_ATK3
+    {SPR_GOSS,6,3,{NULL},S_GOSS_PAIN2,0,0},	// S_GOSS_PAIN
+    {SPR_GOSS,6,3,{A_Pain},S_GOSS_RUN1,0,0},	// S_GOSS_PAIN2
+    {SPR_GOSS,7,5,{NULL},S_GOSS_DIE2,0,0},	// S_GOSS_DIE1
+    {SPR_GOSS,8,5,{A_Scream},S_GOSS_DIE3,0,0},	// S_GOSS_DIE2
+    {SPR_GOSS,9,5,{A_Fall},S_GOSS_DIE4,0,0},	// S_GOSS_DIE3
+    {SPR_GOSS,10,5,{NULL},S_GOSS_DIE5,0,0},	// S_GOSS_DIE4
+    {SPR_GOSS,11,-1,{NULL},S_NULL,0,0},	// S_GOSS_DIE5//-1
+    {SPR_GOSS,12,5,{NULL},S_GOSS_XDIE2,0,0},	// S_GOSS_XDIE1
+    {SPR_GOSS,13,5,{A_XScream},S_GOSS_XDIE3,0,0},	// S_GOSS_XDIE2
+    {SPR_GOSS,14,5,{A_Fall},S_GOSS_XDIE4,0,0},	// S_GOSS_XDIE3
+    {SPR_GOSS,15,5,{NULL},S_GOSS_XDIE5,0,0},	// S_GOSS_XDIE4
+    {SPR_GOSS,16,5,{NULL},S_GOSS_XDIE6,0,0},	// S_GOSS_XDIE5
+    {SPR_GOSS,17,5,{NULL},S_GOSS_XDIE7,0,0},	// S_GOSS_XDIE6
+    {SPR_GOSS,18,5,{NULL},S_GOSS_XDIE8,0,0},	// S_GOSS_XDIE7
+    {SPR_GOSS,19,5,{NULL},S_GOSS_XDIE9,0,0},	// S_GOSS_XDIE8
+    {SPR_GOSS,20,-1,{NULL},S_NULL,0,0},	// S_GOSS_XDIE9
+    {SPR_GOSS,10,5,{NULL},S_GOSS_RAISE2,0,0},	// S_GOSS_RAISE1
+    {SPR_GOSS,9,5,{NULL},S_GOSS_RAISE3,0,0},	// S_GOSS_RAISE2
+    {SPR_GOSS,8,5,{NULL},S_GOSS_RAISE4,0,0},	// S_GOSS_RAISE3
+    {SPR_GOSS,7,5,{NULL},S_GOSS_RUN1,0,0},	// S_GOSS_RAISE4
     {SPR_SPOS,0,10,{A_Look},S_SPOS_STND2,0,0},	// S_SPOS_STND
     {SPR_SPOS,1,10,{A_Look},S_SPOS_STND,0,0},	// S_SPOS_STND2
     {SPR_SPOS,0,3,{A_Chase},S_SPOS_RUN2,0,0},	// S_SPOS_RUN1
@@ -1292,7 +1328,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] = {
 	200,		// painchance
 	sfx_popain,		// painsound
 	0,		// meleestate
-	S_POSS_ATK1,		// missilestate
+	S_GOSS_ATK1,		// missilestate
 	S_POSS_DIE1,		// deathstate
 	S_POSS_XDIE1,		// xdeathstate
 	sfx_podth1,		// deathsound
